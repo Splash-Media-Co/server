@@ -1,2 +1,11 @@
-- name: Ruff Check
-  uses: jpetrucciani/ruff-check@0.1.0
+on:
+  push:
+    branches: [master, main]
+
+jobs:
+  ruff:
+    runs-on: ubuntu-latest
+    name: Run Ruff
+    steps:
+      - name: Ruff Check
+        uses: jpetrucciani/ruff-check@0.1.0
