@@ -14,5 +14,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install ruff
       # Update output format to enable automatic inline annotations.
-      - name: Run Ruff
+      - name: Run Ruff Linter
         run: ruff check --output-format=github . --fix
+      - name: Run Ruff Formatter
+        run: ruff format --output-format=github .  

@@ -22,4 +22,4 @@ scratch = scratch(server)
 Info("Started server!")
 
 # Start the server!
-server.run(ip="127.0.0.1", port=3000
+server.run(ip="127.0.0.1", port=3000)
