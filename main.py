@@ -1,6 +1,9 @@
 # Import the server
 from cloudlink import server
 
+# Import logging helpers
+from logs import Info
+
 # Import protocols
 from cloudlink.server.protocols import clpv4, scratch
 
@@ -15,6 +18,8 @@ server.logging.basicConfig(
 # Load protocols
 clpv4 = clpv4(server)
 scratch = scratch(server)
+
+Info("Started server!")
 
 # Start the server!
 server.run(ip="127.0.0.1", port=3000)
