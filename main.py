@@ -51,5 +51,16 @@ async def direct(client, message):
 @server.on_message
 async def msg(client, message):
     Info(str(message))
+@server.on_connect
+async def on_connect(client):
+    Info(f"Client {str(client)} connected")
+
+
+"""@server.on_message
+async def msg(client, message):
+    Info(str(message))
+"""
+
+Info("Started server!")
 # Start the server!
 server.run(ip="127.0.0.1", port=3000)
