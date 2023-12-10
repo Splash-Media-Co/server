@@ -11,9 +11,7 @@ from cloudlink.server.protocols import clpv4, scratch
 server = server()
 
 # Set logging level
-server.logging.basicConfig(
-    level=server.logging.DEBUG # See python's logging library for details on logging levels.
-)
+server.logging.basicConfig(level=server.logging.DEBUG) # See python's logging library for details on logging levels.
 
 # Load protocols
 clpv4 = clpv4(server)
