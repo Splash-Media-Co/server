@@ -1,0 +1,16 @@
+{
+  "users": {
+    "columns": [
+      "username",
+      "creation_date",
+      "uuid",
+      "banned?",
+      "quote",
+      "pfpid",
+      "lastseen",
+      "badgeids",
+      "extraflags"
+    ],
+    "data": []
+  }
+}
