@@ -18,3 +18,9 @@ jobs:
         run: ruff check --output-format=github . --fix
       - name: Run Ruff Formatter
         run: ruff format .  
+      - name: Push changes
+        run: |
+          git config user.name "GitHub"
+          git config user.email "noreply@github.com"
+          git diff-index --quiet HEAD || git commit -sm "Pushing changes from the workflow"
+          git push
