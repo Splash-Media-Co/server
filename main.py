@@ -48,5 +48,8 @@ async def direct(client, message):
     if message["val"]["cmd"] == "post":
         Info(f"Client {str(client)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}")
 
+@server.on_message
+async def msg(client, message):
+    Info(str(message))
 # Start the server!
 server.run(ip="127.0.0.1", port=3000)
