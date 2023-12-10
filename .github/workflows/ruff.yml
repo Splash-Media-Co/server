@@ -26,5 +26,5 @@ jobs:
         run: |
           git config user.name "GitHub"
           git config user.email "noreply@github.com"
-          git diff-index --quiet --cached HEAD || git commit -sm "Run Ruff Linter & Formatter"
+          git diff-index --quiet HEAD || git commit -sm "Run Ruff Linter & Formatter"
           git push
