@@ -1,5 +1,7 @@
+# owodb.py
 import json
 import os
+from logs import Info, Warning, Debug, Error, Critical
 
 class OwODB:
     """"Your average homie that identifies as a JSON DB."""
@@ -22,9 +24,9 @@ class OwODB:
         if table_name not in self.data:
             self.data[table_name] = {'columns': columns, 'data': []}
             self.save_data()
-            print(f"DB: Table '{table_name}' created successfully.")
+            Info(f"Table '{table_name}' created successfully.")
         else:
-            print(f"Table '{table_name}' already exists.")
+            Warning(f"Table '{table_name}' already exists.")
 
     def insert_data(self, table_name, values):
         if table_name in self.data:
@@ -32,11 +34,11 @@ class OwODB:
                 row = dict(zip(self.data[table_name]['columns'], values))
                 self.data[table_name]['data'].append(row)
                 self.save_data()
-                print("Data inserted successfully.")
+                Info("Data inserted successfully.")
             else:
-                print("Number of values does not match the number of columns.")
+                Error("Number of values does not match the number of columns.")
         else:
-            print(f"Table '{table_name}' does not exist.")
+            Warning(f"Table '{table_name}' does not exist.")
 
     def select_data(self, table_name, conditions=None):
         if table_name in self.data:
@@ -45,7 +47,7 @@ class OwODB:
                 result = [row for row in result if all(row.get(col) == value for col, value in conditions.items())]
             return result
         else:
-            print(f"Table '{table_name}' does not exist.")
+            Warning(f"Table '{table_name}' does not exist.")
             return []
 
     def update_data(self, table_name, set_values, conditions=None):
@@ -57,9 +59,9 @@ class OwODB:
                     if col in row:
                         row[col] = value
             self.save_data()
-            print("Data updated successfully.")
+            Info("Data updated successfully.")
         else:
-            print(f"Table '{table_name}' does not exist.")
+            Warning(f"Table '{table_name}' does not exist.")
 
     def delete_data(self, table_name, conditions=None):
         if table_name in self.data:
@@ -69,6 +71,6 @@ class OwODB:
             else:
                 self.data[table_name]['data'] = []
             self.save_data()
-            print("Data deleted successfully.")
+            Info("Data deleted successfully.")
         else:
-            print(f"Table '{table_name}' does not exist.")
+            Warning(f"Table '{table_name}' does not exist.")
