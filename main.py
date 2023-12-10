@@ -29,6 +29,7 @@ t: Object containing time details + timestamp
 post_id: id of the post (made srv-side, don't send)
 """
 
+
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
     if message["val"]["cmd"] == "post":
@@ -36,9 +37,11 @@ async def direct(client, message):
             f"Client {str(client)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}"
         )
 
+
 @server.on_connect
 async def on_connect(client):
     Info(f"Client {str(client)} connected")
+
 
 """@server.on_message
 async def msg(client, message):
