@@ -1,4 +1,3 @@
-from array import array
 import json
 import os
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
