@@ -32,7 +32,7 @@ class OwODB:
             Warning(f"Table '{table_name}' already exists")
             return {"status": 409, "msg": "already exists"}
 
-    def insert_data(self, table_name: str, values: array) -> dict:
+    def insert_data(self, table_name: str, values: list) -> dict:
         if table_name in self.data:
             if len(values) == len(self.data[table_name]["columns"]):
                 row = dict(zip(self.data[table_name]["columns"], values))

@@ -7,6 +7,9 @@ from logs import Info
 # Import DB handler
 from owodb import OwODB  # noqa: F401
 
+# Import UUID helpers
+import uuid
+
 # Import protocols
 from cloudlink.server.protocols import clpv4, scratch
 
@@ -16,18 +19,16 @@ server = server()
 # Instantiate the OwODB object
 db = OwODB("db")
 db.create_table(
-    "users",
+    "posts",
     [
-        "username",
+        "author",
         "creation_date",
-        "uuid",
-        "banned?",
-        "quote",
-        "pfpid",
-        "lastseen",
-        "badgeids",
-        "extraflags",
-    ],
+        "uid",
+        "content",
+        "isDeleted",
+        "post_origin",
+        "type"
+    ]
 )
 
 # Set logging level
@@ -64,8 +65,10 @@ async def post(client, message):
 async def direct(client, message):
     if message["val"]["cmd"] == "post":
         Info(
-            f"Client {str(client)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}"
+            f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}"
         )
+        db.insert_data("posts", [str(client.username), int(message["val"]["val"]["t"]), str(uuid.uuid4()), str(message["val"]["val"]["p"]), False, "home", str(message["val"]["val"]["type"])])
+        server.send_packet_unicast(client, {"cmd": "direct", "val": {"cmd": "rpost", "val": {"author": client.username, "post_content": str(message["val"]["val"]["p"])}}})
 
 
 @server.on_message
