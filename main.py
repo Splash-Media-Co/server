@@ -39,8 +39,6 @@ server.logging.basicConfig(
 clpv4 = clpv4(server)
 scratch = scratch(server)
 
-Info("Started server!")
-
 
 @server.on_connect
 async def on_connect(client):
