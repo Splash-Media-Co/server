@@ -5,7 +5,7 @@ from cloudlink import server
 from logs import Info
 
 # Import DB handler
-from owodb import OwODB  # noqa: F401
+from oceandb import OceanDB  # noqa: F401
 
 # Import UUID helpers
 import uuid
@@ -17,19 +17,7 @@ from cloudlink.server.protocols import clpv4, scratch
 server = server()
 
 # Instantiate the OwODB object
-db = OwODB("db")
-db.create_table(
-    "posts",
-    [
-        "author",
-        "creation_date",
-        "uid",
-        "content",
-        "isDeleted",
-        "post_origin",
-        "type"
-    ]
-)
+db = OceanDB("db")
 
 # Set logging level
 server.logging.basicConfig(

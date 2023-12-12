@@ -1,101 +1,22 @@
 {
-  "users": {
-    "columns": [
-      "username",
-      "creation_date",
-      "uuid",
-      "banned?",
-      "quote",
-      "pfpid",
-      "lastseen",
-      "badgeids",
-      "extraflags"
-    ],
-    "data": []
+  "users":{
+     "username":"TEXT",
+     "creation_date":"BIGINT",
+     "uuid":"TEXT",
+     "banned?":"BOOL",
+     "quote":"TEXT",
+     "pfpid":"INTEGER",
+     "lastseen":"BIGINT",
+     "badgeids":"TEXT",
+     "extraflags":"VARCHAR"
   },
-  "posts": {
-    "columns": [
-      "author",
-      "creation_date",
-      "uid",
-      "content",
-      "isDeleted",
-      "post_origin",
-      "type"
-    ],
-    "data": [
-      {
-        "author": "NotFenixio",
-        "creation_date": 1702291877968,
-        "uid": "ac42a5a4-3655-3ef6-b79a-a7401a24c7b3",
-        "content": "assdoblvnsv",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      },
-      {
-        "author": "NotFenixio",
-        "creation_date": 1702292399694,
-        "uid": "790b5b0b-2e7f-48e2-9f9c-66cd93fa70d1",
-        "content": "assdoblvnsv",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      },
-      {
-        "author": "NotFenixio",
-        "creation_date": 1702295702054,
-        "uid": "9cb5dad0-2ca3-4601-8b84-e7a111ca55f0",
-        "content": "hay",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      },
-      {
-        "author": "NotFenixio",
-        "creation_date": 1702295729307,
-        "uid": "145c36b4-31a2-4c54-9ed2-fce79773aecf",
-        "content": "hay",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      },
-      {
-        "author": "NotFenixio",
-        "creation_date": 1702295760037,
-        "uid": "2dc8500d-cc2b-48de-bdc7-fa324c8d6def",
-        "content": "hay",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      },
-      {
-        "author": "NotFenixio",
-        "creation_date": 1702295838489,
-        "uid": "63d67279-e5bf-442a-b97b-ffdefe40e70f",
-        "content": "hay",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      },
-      {
-        "author": "NotFenixio",
-        "creation_date": 1702295861210,
-        "uid": "5c67564c-fb73-4fb4-9676-16df91ec63bb",
-        "content": "hey",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      },
-      {
-        "author": "player0831",
-        "creation_date": 1702295933196,
-        "uid": "cdd620c9-9448-4158-8a3a-40bde66361f9",
-        "content": "asdd",
-        "isDeleted": false,
-        "post_origin": "home",
-        "type": "send"
-      }
-    ]
+  "posts":{
+     "author":"TEXT",
+     "creation_date":"BIGINT",
+     "uid":"TEXT",
+     "content":"TEXT",
+     "isDeleted?":"BOOL",
+     "post_origin":"TEXT",
+     "type":"TEXT"
   }
 }
