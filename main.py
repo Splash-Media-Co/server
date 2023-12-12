@@ -98,10 +98,12 @@ async def msg(client, message):
 
 Info("Started server!")
 
+
 def signal_handler(sig, frame):
     print(f"Received signal {sig}. Script is terminating.")
     db.close()
     sys.exit(0)
+
 
 signal.signal(signal.SIGTERM, signal_handler)
 

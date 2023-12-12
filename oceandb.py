@@ -62,6 +62,6 @@ class OceanDB:
         # Execute the delete query
         self.cursor.execute(query)
         self.commit()
-    
+
     def close(self):
         self.conn.close()

@@ -1,5 +1,4 @@
 #!/usr/bin/env python
-import sys
 import sqlite3
 
 from prompt_toolkit import PromptSession
