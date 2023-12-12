@@ -1,12 +1,12 @@
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
 import sqlite3  # noqa: F401
 
-
 class OceanDB:
     def __init__(self, db_name):
         self.db_name = db_name
         self.conn = sqlite3.connect(f"{db_name}.sqlite")
         self.cursor = self.conn.cursor()
+        Info(f"Connected to {db_name}.sqlite!")
 
     def commit(self):
         self.conn.commit()
@@ -62,6 +62,8 @@ class OceanDB:
         # Execute the delete query
         self.cursor.execute(query)
         self.commit()
-
+        Warning(f"Deleted data from {table_name}")
+    
     def close(self):
         self.conn.close()
+        Info(f"Closed database {self.db_name}")
