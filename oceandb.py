@@ -41,7 +41,12 @@ class OceanDB:
             query += f" WHERE {conditions_str}"
 
         # Execute the update query
-        self.cursor.execute(query, tuple(update_data.values()) + tuple(conditions.values()) if conditions else tuple(update_data.values()))
+        self.cursor.execute(
+            query,
+            tuple(update_data.values()) + tuple(conditions.values())
+            if conditions
+            else tuple(update_data.values()),
+        )
         self.commit()
 
     def delete_data(self, table_name, conditions=None):
