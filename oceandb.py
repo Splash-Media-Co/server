@@ -13,7 +13,7 @@ class OceanDB:
         self.conn.commit()
 
     def insert_data(self, table_name, values):
-        placeholders = ",".join(["?"] * len(values))
+        placeholders = ",".join(["?" for _ in values])
         sql = f"INSERT INTO {table_name} VALUES ({placeholders})"
         self.cursor.execute(sql, values)
         self.commit()
@@ -22,32 +22,26 @@ class OceanDB:
         query = f"SELECT * FROM {table_name}"
 
         if conditions:
-            conditions_str = " AND ".join(
-                [f"{key} = '{value}'" for key, value in conditions.items()]
-            )
+            conditions_str = " AND ".join([f"{key} = ?" for key in conditions])
             query += f" WHERE {conditions_str}"
 
-        self.cursor.execute(query)
+        self.cursor.execute(query, tuple(conditions.values()) if conditions else ())
         return self.cursor.fetchall()
 
     def update_data(self, table_name, update_data, conditions=None):
         query = f"UPDATE {table_name} SET "
 
         # Construct the SET part of the query with the update_data dictionary
-        set_values = ", ".join(
-            [f"{key} = '{value}'" for key, value in update_data.items()]
-        )
+        set_values = ", ".join([f"{key} = ?" for key in update_data])
         query += set_values
 
         # Add a WHERE clause if conditions are provided
         if conditions:
-            conditions_str = " AND ".join(
-                [f"{key} = '{value}'" for key, value in conditions.items()]
-            )
+            conditions_str = " AND ".join([f"{key} = ?" for key in conditions])
             query += f" WHERE {conditions_str}"
 
         # Execute the update query
-        self.cursor.execute(query)
+        self.cursor.execute(query, tuple(update_data.values()) + tuple(conditions.values()) if conditions else tuple(update_data.values()))
         self.commit()
 
     def delete_data(self, table_name, conditions=None):
@@ -55,13 +49,11 @@ class OceanDB:
 
         # Add a WHERE clause if conditions are provided
         if conditions:
-            conditions_str = " AND ".join(
-                [f"{key} = '{value}'" for key, value in conditions.items()]
-            )
+            conditions_str = " AND ".join([f"{key} = ?" for key in conditions])
             query += f" WHERE {conditions_str}"
 
         # Execute the delete query
-        self.cursor.execute(query)
+        self.cursor.execute(query, tuple(conditions.values()) if conditions else ())
         self.commit()
         Warning(f"Deleted data from {table_name}")
 
