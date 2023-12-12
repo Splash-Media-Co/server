@@ -1,7 +1,7 @@
 # Import the server
 from cloudlink import server
-# Import logging helpers
 
+# Import logging helpers
 from logs import Info
 
 # Import DB handler
@@ -12,6 +12,10 @@ import uuid
 
 # Import protocols
 from cloudlink.server.protocols import clpv4, scratch
+
+# Import signal handling and sys
+import signal
+import sys
 
 # Instantiate the server object
 server = server()
@@ -93,5 +97,13 @@ async def msg(client, message):
 """
 
 Info("Started server!")
+
+def signal_handler(sig, frame):
+    print(f"Received signal {sig}. Script is terminating.")
+    db.close()
+    sys.exit(0)
+
+signal.signal(signal.SIGTERM, signal_handler)
+
 # Start the server!
 server.run(ip="127.0.0.1", port=3000)
