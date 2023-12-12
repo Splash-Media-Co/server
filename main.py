@@ -55,8 +55,31 @@ async def direct(client, message):
         Info(
             f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}"
         )
-        db.insert_data("posts", [str(client.username), int(message["val"]["val"]["t"]), str(uuid.uuid4()), str(message["val"]["val"]["p"]), False, "home", str(message["val"]["val"]["type"])])
-        server.send_packet_unicast(client, {"cmd": "direct", "val": {"cmd": "rpost", "val": {"author": client.username, "post_content": str(message["val"]["val"]["p"])}}})
+        db.insert_data(
+            "posts",
+            [
+                str(client.username),
+                int(message["val"]["val"]["t"]),
+                str(uuid.uuid4()),
+                str(message["val"]["val"]["p"]),
+                False,
+                "home",
+                str(message["val"]["val"]["type"]),
+            ],
+        )
+        server.send_packet_unicast(
+            client,
+            {
+                "cmd": "direct",
+                "val": {
+                    "cmd": "rpost",
+                    "val": {
+                        "author": client.username,
+                        "post_content": str(message["val"]["val"]["p"]),
+                    },
+                },
+            },
+        )
 
 
 @server.on_message
