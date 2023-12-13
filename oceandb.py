@@ -54,7 +54,7 @@ class OceanDB:
         self.cursor.execute(sql, values)
         self.commit()
 
-    def select_data(self, table_name: str, conditions: dict = None) -> list: # type: ignore
+    def select_data(self, table_name: str, conditions: dict = None) -> list:  # type: ignore
         """
         Retrieve data from the specified table.
 
@@ -74,7 +74,9 @@ class OceanDB:
         self.cursor.execute(query, tuple(conditions.values()) if conditions else ())
         return self.cursor.fetchall()
 
-    def update_data(self, table_name: str, update_data: dict, conditions: dict = None) -> None: # type: ignore
+    def update_data(
+        self, table_name: str, update_data: dict, conditions: dict = None
+    ) -> None:  # type: ignore
         """
         Update data in the specified table.
 
@@ -101,7 +103,7 @@ class OceanDB:
         )
         self.commit()
 
-    def delete_data(self, table_name: str, conditions: dict = None) -> None: # type: ignore
+    def delete_data(self, table_name: str, conditions: dict = None) -> None:  # type: ignore
         """
         Delete data from the specified table.
 
