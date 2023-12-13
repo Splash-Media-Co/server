@@ -2,7 +2,7 @@
 from cloudlink import server
 
 # Import logging helpers
-from logs import Info
+from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
 
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
@@ -61,7 +61,7 @@ async def direct(client, message):
         )
         db.insert_data(
             "posts",
-            [
+            (
                 str(client.username),
                 int(message["val"]["val"]["t"]),
                 str(uuid.uuid4()),
@@ -69,7 +69,7 @@ async def direct(client, message):
                 False,
                 "home",
                 str(message["val"]["val"]["type"]),
-            ],
+            ),
         )
         server.send_packet_unicast(
             client,
@@ -100,12 +100,13 @@ Info("Started server!")
 
 
 def signal_handler(sig, frame):
-    print(f"Received signal {sig}. Script is terminating.")
+    print("\n")
+    Error(f"Received signal {sig}. Script is terminating.")
     db.close()
     sys.exit(0)
 
 
-signal.signal(signal.SIGTERM, signal_handler)
+signal.signal(signal.SIGINT, signal_handler)
 
 # Start the server!
 server.run(ip="127.0.0.1", port=3000)
