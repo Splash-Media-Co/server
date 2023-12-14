@@ -75,7 +75,10 @@ class OceanDB:
         return self.cursor.fetchall()
 
     def update_data(
-        self, table_name: str, update_data: dict, conditions: dict = None # type: ignore
+        self,
+        table_name: str,
+        update_data: dict,
+        conditions: dict = None,  # type: ignore
     ) -> None:
         """
         Update data in the specified table.
