@@ -76,8 +76,8 @@ async def direct(client, message):
                     str(message["val"]["val"]["type"]),
                 ),
             )
-            server.send_packet_unicast(
-                client,
+            server.send_packet_multicast(
+                server.clients_manager.clients,
                 {
                     "cmd": "gmsg",
                     "val": {
