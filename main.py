@@ -4,6 +4,10 @@ from cloudlink import server
 # Import logging helpers
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
 
+# Import time handlers
+import time  # noqa: F401
+import datetime  # noqa: F401
+
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
 
@@ -58,13 +62,13 @@ async def direct(client, message):
     match message["val"]["cmd"]:
         case "post":
             Info(
-                f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}"
+                f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
             )
             db.insert_data(
                 "posts",
                 (
                     str(client.username),
-                    int(message["val"]["val"]["t"]),
+                    float(time.time()),
                     str(uuid.uuid4()),
                     str(message["val"]["val"]["p"]),
                     False,
@@ -75,7 +79,7 @@ async def direct(client, message):
             server.send_packet_unicast(
                 client,
                 {
-                    "cmd": "direct",
+                    "cmd": "gmsg",
                     "val": {
                         "cmd": "rpost",
                         "val": {
