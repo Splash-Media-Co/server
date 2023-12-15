@@ -59,37 +59,57 @@ async def post(client, message):
 
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
-    match message["val"]["cmd"]:
+    match str(message["val"]["cmd"]):
         case "post":
-            Info(
-                f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
-            )
-            db.insert_data(
-                "posts",
-                (
-                    str(client.username),
-                    float(time.time()),
-                    str(uuid.uuid4()),
-                    str(message["val"]["val"]["p"]),
-                    False,
-                    "home",
-                    str(message["val"]["val"]["type"]),
-                ),
-            )
-            server.send_packet_multicast(
-                server.clients_manager.clients,
-                {
-                    "cmd": "gmsg",
-                    "val": {
-                        "cmd": "rpost",
-                        "val": {
-                            "author": client.username,
-                            "post_content": str(message["val"]["val"]["p"]),
+            match str(message["val"]["val"]["type"]):
+                case "send":
+                    Info(
+                        f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
+                    )
+                    uid = str(uuid.uuid4())
+                    db.insert_data(
+                        "posts",
+                        (
+                            str(client.username),
+                            float(time.time()),
+                            uid,
+                            str(message["val"]["val"]["p"]),
+                            False,
+                            "home",
+                            str(message["val"]["val"]["type"]),
+                        ),
+                    )
+                    server.send_packet_multicast(
+                        server.clients_manager.clients,
+                        {
+                            "cmd": "gmsg",
+                            "val": {
+                                "cmd": "rpost",
+                                "val": {
+                                    "author": client.username,
+                                    "post_content": str(message["val"]["val"]["p"]),
+                                    "uid": uid
+                                },
+                            },
                         },
-                    },
-                },
-            )
-
+                    )
+                case "delete":
+                    Info(
+                        f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
+                    )
+                    db.update_data("posts", {"isDelete": True}, {"uid": str(message["val"]["val"]["uid"])})
+                    server.send_packet_multicast(
+                        server.clients_manager.clients,
+                        {
+                            "cmd": "gmsg",
+                            "val": {
+                                "cmd": "rdel",
+                                "val": {
+                                    "uid": str(message["val"]["val"]["uid"])
+                                },
+                            },
+                        },
+                    )
 
 @server.on_message
 async def msg(client, message):
