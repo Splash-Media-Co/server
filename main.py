@@ -88,7 +88,7 @@ async def direct(client, message):
                                 "val": {
                                     "author": client.username,
                                     "post_content": str(message["val"]["val"]["p"]),
-                                    "uid": uid
+                                    "uid": uid,
                                 },
                             },
                         },
@@ -97,19 +97,22 @@ async def direct(client, message):
                     Info(
                         f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
                     )
-                    db.update_data("posts", {"isDelete": True}, {"uid": str(message["val"]["val"]["uid"])})
+                    db.update_data(
+                        "posts",
+                        {"isDelete": True},
+                        {"uid": str(message["val"]["val"]["uid"])},
+                    )
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
                             "cmd": "gmsg",
                             "val": {
                                 "cmd": "rdel",
-                                "val": {
-                                    "uid": str(message["val"]["val"]["uid"])
-                                },
+                                "val": {"uid": str(message["val"]["val"]["uid"])},
                             },
                         },
                     )
+
 
 @server.on_message
 async def msg(client, message):
