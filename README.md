@@ -4,4 +4,5 @@
 
 <h1 align="center">Backend server for Splash</h1>
 <h4 align="center">This is the server that runs everything Splash.</h4>
-<h4 align="center">So basically, no server, no Splash!</h4>
+<h4 align="center">Build dreams. Create memories. Live life.</h4>
+
