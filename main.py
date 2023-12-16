@@ -97,7 +97,7 @@ async def direct(client, message):
                     Info(
                         f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
                     )
-                    db.update_data("posts", {"isDelete": True}, {"uid": str(message["val"]["val"]["uid"])})
+                    db.update_data("posts", {"isDeleted": True}, {"uid": str(message["val"]["val"]["uid"])})
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
