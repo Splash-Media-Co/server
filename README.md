@@ -3,6 +3,4 @@
 </p>
 
 <h1 align="center">Backend server for Splash</h1>
-<h4 align="center">This is the server that runs everything Splash.</h4>
-<h5 align="center">(lp quit with the comments)</h5>
-
+<h4 align="center">This is the server that runs all of Splash.</h4>
