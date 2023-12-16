@@ -99,7 +99,7 @@ async def direct(client, message):
                     )
                     db.update_data(
                         "posts",
-                        {"isDelete": True},
+                        {"isDeleted": True},
                         {"uid": str(message["val"]["val"]["uid"])},
                     )
                     server.send_packet_multicast(
