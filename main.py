@@ -44,13 +44,15 @@ clpv4 = clpv4(server)
 scratch = scratch(server)
 
 # Load secret
-KEY = os.getenv('KEY')
+KEY = os.getenv("KEY")
 
 authenticated_clients = []
+
 
 @server.on_connect
 async def on_connect(client):
     Info(f"Client {str(client.id)} connected")
+
 
 @server.on_disconnect
 async def on_disconnect(client):
@@ -80,7 +82,7 @@ async def direct(client, message):
         case "post":
             match str(message["val"]["val"]["type"]):
                 case "send":
-                    if (client.id not in authenticated_clients):
+                    if client.id not in authenticated_clients:
                         try:
                             await server.send_packet_unicast(
                                 client,
@@ -90,13 +92,16 @@ async def direct(client, message):
                                         "cmd": "status",
                                         "val": {
                                             "message": "Not authenticated",
-                                            "username": client.username
-                                        }
-                                    }
-                                }
+                                            "username": client.username,
+                                        },
+                                    },
+                                },
                             )
                         except Exception as e:
-                            Error(f"Error sending message to client {str(client)}: " + str(e))
+                            Error(
+                                f"Error sending message to client {str(client)}: "
+                                + str(e)
+                            )
                     else:
                         Info(
                             f"Client {str(client.username)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
@@ -129,7 +134,7 @@ async def direct(client, message):
                             },
                         )
                 case "delete":
-                    if (client.id not in authenticated_clients):
+                    if client.id not in authenticated_clients:
                         try:
                             await server.send_packet_unicast(
                                 client,
@@ -139,13 +144,16 @@ async def direct(client, message):
                                         "cmd": "status",
                                         "val": {
                                             "message": "Not authenticated",
-                                            "username": client.username
-                                        }
-                                    }
-                                }
+                                            "username": client.username,
+                                        },
+                                    },
+                                },
                             )
                         except Exception as e:
-                            Error(f"Error sending message to client {str(client)}: " + str(e))
+                            Error(
+                                f"Error sending message to client {str(client)}: "
+                                + str(e)
+                            )
                     else:
                         Info(
                             f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
@@ -169,20 +177,13 @@ async def direct(client, message):
             USER = message["val"]["val"]["username"]
             PASSWORD = message["val"]["val"]["pswd"]
 
-            selection = db.select_data(
-                "users", {
-                    "username": USER
-                }
-            )
+            selection = db.select_data("users", {"username": USER})
             print(str(selection))
             if selection:
                 if Fernet(KEY).decrypt(str(selection[0][9])) == PASSWORD:
                     Info(f"Client {str(client.username)} logged in")
                     token = jwt.encode(
-                        {
-                            "username": USER,
-                            "password": selection[0][9]
-                        },
+                        {"username": USER, "password": selection[0][9]},
                         KEY,
                         algorithm="HS256",
                     )
@@ -216,8 +217,8 @@ async def direct(client, message):
                         "val": {
                             "message": "User doesn't exist",
                             "username": USER,
-                        }
-                    }
+                        },
+                    },
                 )
 
 
