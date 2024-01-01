@@ -70,7 +70,7 @@ async def direct(
                     )
                     uid = str(uuid.uuid4())
                     print(uid)
-                    #auth stuff goes here i guess
+                    # auth stuff goes here i guess
                     chatid = message["val"]["val"]["c"]
                     user = message["val"]["val"]["u"]
                     post = message["val"]["val"]["p"]
@@ -78,36 +78,48 @@ async def direct(
                     try:
                         db[f"dict_posts_{chatid}"]
                     except KeyError:
-                        print(f'new chat created somehow: {chatid}')
+                        print(f"new chat created somehow: {chatid}")
                         db[f"dict_posts_{chatid}"] = {}
-                    print({"sender":user,"post":post,"timestamp":timestamp,"uid":uid})
-                    db[f"dict_posts_{chatid}"][uid] = {"sender":user,"post":post,"timestamp":timestamp,"message_uid":uid} #needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
+                    print(
+                        {
+                            "sender": user,
+                            "post": post,
+                            "timestamp": timestamp,
+                            "uid": uid,
+                        }
+                    )
+                    db[f"dict_posts_{chatid}"][uid] = {
+                        "sender": user,
+                        "post": post,
+                        "timestamp": timestamp,
+                        "message_uid": uid,
+                    }  # needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
                     print(db[f"dict_posts_{chatid}"])
                     print(f'db: {db[f"dict_posts_{chatid}"][uid]}')
-                    #db.insert_data(
-                        #"posts",
-                        #(
-                        #    str(client.username),
-                        #    float(time.time()),
-                        #    uid,
-                        #    str(message["val"]["val"]["p"]),
-                        #    False,
-                        #    "home",
-                        #    str(message["val"]["val"]["type"]),
-                        #),
-                    #)
+                    # db.insert_data(
+                    # "posts",
+                    # (
+                    #    str(client.username),
+                    #    float(time.time()),
+                    #    uid,
+                    #    str(message["val"]["val"]["p"]),
+                    #    False,
+                    #    "home",
+                    #    str(message["val"]["val"]["type"]),
+                    # ),
+                    # )
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
-                        "cmd": "gmsg",
-                        "val": {
-                            "cmd": "rpost",
-                            "val":{
-                                "author": message["val"]["val"]["u"],
-                                "post_content": str(message["val"]["val"]["p"]),
-                                "uid": uid,
-                                "timestamp": message["val"]["val"]["t"],
-                                "chat_id": message["val"]["val"]["c"]
+                            "cmd": "gmsg",
+                            "val": {
+                                "cmd": "rpost",
+                                "val": {
+                                    "author": message["val"]["val"]["u"],
+                                    "post_content": str(message["val"]["val"]["p"]),
+                                    "uid": uid,
+                                    "timestamp": message["val"]["val"]["t"],
+                                    "chat_id": message["val"]["val"]["c"],
                                 },
                             },
                         },
@@ -134,10 +146,7 @@ async def direct(
                         },
                     )
                 case "getposts":
-                    Info(
-                        f"Client {str(client.id)} requested somethin i dont know"
-                    )
-                
+                    Info(f"Client {str(client.id)} requested somethin i dont know")
 
 
 @server.on_message
