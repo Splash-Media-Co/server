@@ -10,7 +10,7 @@ import datetime  # noqa: F401
 
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
-
+from local_simple_database import LocalDictDatabase
 # Import UUID helpers
 import uuid
 
@@ -24,9 +24,8 @@ import sys
 # Instantiate the server object
 server = server()
 
-# Instantiate the OwODB object
-db = OceanDB("db")
-
+# Instantiate the LDD object
+db = LocalDictDatabase()
 # Set logging level
 server.logging.basicConfig(
     level=server.logging.DEBUG  # See python's logging library for details on logging levels.
@@ -58,27 +57,30 @@ async def post(client, message):
 
 
 @server.on_command(cmd="direct", schema=clpv4.schema)
-async def direct(client, message):
+async def direct(client, message,):
     match str(message["val"]["cmd"]):
         case "post":
             match str(message["val"]["val"]["type"]):
                 case "send":
                     Info(
-                        f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
+                        f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}, chat_id = {str(message["val"]["val"]["c"])}"
                     )
                     uid = str(uuid.uuid4())
-                    db.insert_data(
-                        "posts",
-                        (
-                            str(client.username),
-                            float(time.time()),
-                            uid,
-                            str(message["val"]["val"]["p"]),
-                            False,
-                            "home",
-                            str(message["val"]["val"]["type"]),
-                        ),
-                    )
+                    #auth stuff goes here i guess
+                    db[message["val"]["val"]["c"]][uid] = {"sender":message["val"]["val"]["u"],"user":message["val"]["val"]["u"],"timestamp":message["val"]["val"]["t"],"uid":uid} #needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
+
+                    #db.insert_data(
+                        #"posts",
+                        #(
+                        #    str(client.username),
+                        #    float(time.time()),
+                        #    uid,
+                        #    str(message["val"]["val"]["p"]),
+                        #    False,
+                        #    "home",
+                        #    str(message["val"]["val"]["type"]),
+                        #),
+                    #)
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
@@ -95,13 +97,16 @@ async def direct(client, message):
                     )
                 case "delete":
                     Info(
-                        f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
+                        f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}, chat_id = {str(message["val"]["val"]["c"])}"
+
                     )
-                    db.update_data(
-                        "posts",
-                        {"isDeleted": True},
-                        {"uid": str(message["val"]["val"]["uid"])},
-                    )
+                    #auth stuff here so you cant just delete other people's messages
+                    del db[message["val"]["val"]["c"]][message["val"]["val"]["uid"]]
+                    #db.update_data(
+                    #    "posts",
+                    #    {"isDeleted": True},
+                    #    {"uid": str(message["val"]["val"]["uid"])},
+                    #)
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
@@ -137,4 +142,4 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 # Start the server!
-server.run(ip="127.0.0.1", port=3000)
+server.run(ip="localhost", port=8080)
