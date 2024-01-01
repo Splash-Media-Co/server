@@ -77,7 +77,7 @@ async def direct(
                     timestamp = message["val"]["val"]["t"]
                     try:
                         db[f"dict_posts_{chatid}"]
-                    except:
+                    except KeyError:
                         print(f'new chat created somehow: {chatid}')
                         db[f"dict_posts_{chatid}"] = {}
                     print({"sender":user,"post":post,"timestamp":timestamp,"uid":uid})
