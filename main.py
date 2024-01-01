@@ -9,7 +9,6 @@ import time  # noqa: F401
 import datetime  # noqa: F401
 
 # Import DB handler
-from oceandb import OceanDB  # noqa: F401
 from local_simple_database import LocalDictDatabase
 # Import UUID helpers
 import uuid
@@ -25,7 +24,7 @@ import sys
 server = server()
 
 # Instantiate the LDD object
-db = LocalDictDatabase()
+db = LocalDictDatabase(str_path_database_dir="./Documents/Github/server/db")
 # Set logging level
 server.logging.basicConfig(
     level=server.logging.DEBUG  # See python's logging library for details on logging levels.
@@ -66,9 +65,22 @@ async def direct(client, message,):
                         f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}, chat_id = {str(message["val"]["val"]["c"])}"
                     )
                     uid = str(uuid.uuid4())
+                    print(uid)
                     #auth stuff goes here i guess
-                    db[message["val"]["val"]["c"]][uid] = {"sender":message["val"]["val"]["u"],"user":message["val"]["val"]["u"],"timestamp":message["val"]["val"]["t"],"uid":uid} #needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
-
+                    chatid = message["val"]["val"]["c"]
+                    user = message["val"]["val"]["u"]
+                    post = message["val"]["val"]["p"]
+                    timestamp = message["val"]["val"]["t"]
+                    try:
+                        db["dict_posts"][chatid]
+                    except:
+                        print(f'new chat created somehow: {chatid}')
+                        db["dict_posts"][chatid] = {}
+                    print(db["dict_posts"][chatid])
+                    print({"sender":user,"post":post,"timestamp":timestamp,"uid":uid})
+                    db["dict_posts"][chatid][uid] = {"sender":user,"post":post,"timestamp":timestamp,"message_uid":uid} #needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
+                    print(db["dict_posts"][chatid])
+                    print(f'db: {db["dict_posts"][chatid][uid]}')
                     #db.insert_data(
                         #"posts",
                         #(
@@ -84,13 +96,15 @@ async def direct(client, message,):
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
-                            "cmd": "gmsg",
-                            "val": {
-                                "cmd": "rpost",
-                                "val": {
-                                    "author": client.username,
-                                    "post_content": str(message["val"]["val"]["p"]),
-                                    "uid": uid,
+                        "cmd": "gmsg",
+                        "val": {
+                            "cmd": "rpost",
+                            "val":{
+                                "author": message["val"]["val"]["u"],
+                                "post_content": str(message["val"]["val"]["p"]),
+                                "uid": uid,
+                                "timestamp": message["val"]["val"]["t"],
+                                "chat_id": message["val"]["val"]["c"]
                                 },
                             },
                         },
@@ -117,6 +131,11 @@ async def direct(client, message,):
                             },
                         },
                     )
+                case "getposts":
+                    Info(
+                        f"Client {str(client.id)} requested somethin i dont know"
+                    )
+                
 
 
 @server.on_message
