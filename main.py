@@ -10,6 +10,7 @@ import datetime  # noqa: F401
 
 # Import DB handler
 from local_simple_database import LocalDictDatabase
+
 # Import UUID helpers
 import uuid
 
@@ -56,7 +57,10 @@ async def post(client, message):
 
 
 @server.on_command(cmd="direct", schema=clpv4.schema)
-async def direct(client, message,):
+async def direct(
+    client,
+    message,
+):
     match str(message["val"]["cmd"]):
         case "post":
             match str(message["val"]["val"]["type"]):
@@ -65,6 +69,7 @@ async def direct(client, message,):
                         f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}, chat_id = {str(message["val"]["val"]["c"])}"
                     )
                     uid = str(uuid.uuid4())
+<<<<<<< HEAD
                     print(uid)
                     #auth stuff goes here i guess
                     chatid = message["val"]["val"]["c"]
@@ -93,6 +98,28 @@ async def direct(client, message,):
                         #    str(message["val"]["val"]["type"]),
                         #),
                     #)
+=======
+                    # auth stuff goes here i guess
+                    db[message["val"]["val"]["c"]][uid] = {
+                        "sender": message["val"]["val"]["u"],
+                        "user": message["val"]["val"]["u"],
+                        "timestamp": message["val"]["val"]["t"],
+                        "uid": uid,
+                    }  # needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
+
+                    # db.insert_data(
+                    # "posts",
+                    # (
+                    #    str(client.username),
+                    #    float(time.time()),
+                    #    uid,
+                    #    str(message["val"]["val"]["p"]),
+                    #    False,
+                    #    "home",
+                    #    str(message["val"]["val"]["type"]),
+                    # ),
+                    # )
+>>>>>>> 1c2177b289eda164af2e70cb7ed4f3c4165a9f9a
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
@@ -112,15 +139,14 @@ async def direct(client, message,):
                 case "delete":
                     Info(
                         f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}, chat_id = {str(message["val"]["val"]["c"])}"
-
                     )
-                    #auth stuff here so you cant just delete other people's messages
+                    # auth stuff here so you cant just delete other people's messages
                     del db[message["val"]["val"]["c"]][message["val"]["val"]["uid"]]
-                    #db.update_data(
+                    # db.update_data(
                     #    "posts",
                     #    {"isDeleted": True},
                     #    {"uid": str(message["val"]["val"]["uid"])},
-                    #)
+                    # )
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
