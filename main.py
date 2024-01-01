@@ -69,7 +69,6 @@ async def direct(
                         f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {str(message["val"]["val"]["t"])}, chat_id = {str(message["val"]["val"]["c"])}"
                     )
                     uid = str(uuid.uuid4())
-<<<<<<< HEAD
                     print(uid)
                     #auth stuff goes here i guess
                     chatid = message["val"]["val"]["c"]
@@ -77,15 +76,14 @@ async def direct(
                     post = message["val"]["val"]["p"]
                     timestamp = message["val"]["val"]["t"]
                     try:
-                        db["dict_posts"][chatid]
+                        db[f"dict_posts_{chatid}"]
                     except:
                         print(f'new chat created somehow: {chatid}')
-                        db["dict_posts"][chatid] = {}
-                    print(db["dict_posts"][chatid])
+                        db[f"dict_posts_{chatid}"] = {}
                     print({"sender":user,"post":post,"timestamp":timestamp,"uid":uid})
-                    db["dict_posts"][chatid][uid] = {"sender":user,"post":post,"timestamp":timestamp,"message_uid":uid} #needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
-                    print(db["dict_posts"][chatid])
-                    print(f'db: {db["dict_posts"][chatid][uid]}')
+                    db[f"dict_posts_{chatid}"][uid] = {"sender":user,"post":post,"timestamp":timestamp,"message_uid":uid} #needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
+                    print(db[f"dict_posts_{chatid}"])
+                    print(f'db: {db[f"dict_posts_{chatid}"][uid]}')
                     #db.insert_data(
                         #"posts",
                         #(
@@ -98,28 +96,6 @@ async def direct(
                         #    str(message["val"]["val"]["type"]),
                         #),
                     #)
-=======
-                    # auth stuff goes here i guess
-                    db[message["val"]["val"]["c"]][uid] = {
-                        "sender": message["val"]["val"]["u"],
-                        "user": message["val"]["val"]["u"],
-                        "timestamp": message["val"]["val"]["t"],
-                        "uid": uid,
-                    }  # needs uid param because it will generally be accessed with db[chat_id][-1] (or whatever position)
-
-                    # db.insert_data(
-                    # "posts",
-                    # (
-                    #    str(client.username),
-                    #    float(time.time()),
-                    #    uid,
-                    #    str(message["val"]["val"]["p"]),
-                    #    False,
-                    #    "home",
-                    #    str(message["val"]["val"]["type"]),
-                    # ),
-                    # )
->>>>>>> 1c2177b289eda164af2e70cb7ed4f3c4165a9f9a
                     server.send_packet_multicast(
                         server.clients_manager.clients,
                         {
