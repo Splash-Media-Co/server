@@ -24,9 +24,12 @@ import sys
 # Instantiate the server object
 server = server()
 
+
 # create this function
 def timestampsort(e):
     return e[1]
+
+
 # Instantiate the OwODB object
 db = OceanDB("db")
 # Set logging level
@@ -120,10 +123,10 @@ async def direct(client, message):
                     chat_id = message["val"]["val"]["c"]
                     offset = message["val"]["val"]["o"]
                     Info(
-                        f'Client {str(client.id)} retrieved latest messages: chat_id: {chat_id}, offset: {offset}'
+                        f"Client {str(client.id)} retrieved latest messages: chat_id: {chat_id}, offset: {offset}"
                     )
-                    posts = db.select_data("posts",conditions={"post_origin":chat_id})
-                    #print(posts)
+                    posts = db.select_data("posts", conditions={"post_origin": chat_id})
+                    # print(posts)
                     returnposts = []
                     for i in range(len(posts)):
                         returnposts.append(posts[-i + 1])
@@ -135,15 +138,18 @@ async def direct(client, message):
                             "cmd": "pmsg",
                             "val": {
                                 "cmd": "posts",
-                                "val": {"posts":returnposts},
+                                "val": {"posts": returnposts},
                             },
                         },
                     )
-                    returnposts.sort(key=timestampsort,reverse=False)
+                    returnposts.sort(key=timestampsort, reverse=False)
                     print("sent")
+
+
 @server.on_message
 async def msg(client, message):
     Info(str(message))
+
 
 """@server.on_message
 async def msg(client, message):
