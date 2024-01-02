@@ -4,4 +4,3 @@
 
 <h1 align="center">Backend server for Splash</h1>
 <h4 align="center">This is the server that runs all of Splash.</h4>
-<h4 align="center">No server, no Splash, so keep this repo safe.</h4>
