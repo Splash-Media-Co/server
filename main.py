@@ -143,7 +143,7 @@ async def direct(client, message):
                                     },
                                 },
                             },
-                    )
+                        )
                     if SETTINGS["bridge_enabled"]:
                         url = "https://webhooks.meower.org/post/home"
 
@@ -279,6 +279,7 @@ async def direct(client, message):
                         },
                     )
                     returnposts.sort(key=timestampsort, reverse=False)
+
 
 @server.on_message
 async def msg(client, message):
