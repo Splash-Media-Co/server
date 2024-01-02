@@ -11,6 +11,10 @@ import datetime  # noqa: F401
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
 
+# Import requests and json libraries
+import requests
+import json
+
 # Import UUID helpers
 import uuid
 
@@ -36,6 +40,9 @@ server.logging.basicConfig(
 clpv4 = clpv4(server)
 scratch = scratch(server)
 
+SETTINGS = {
+    "bridge_enabled": True
+}
 
 @server.on_connect
 async def on_connect(client):
@@ -93,6 +100,19 @@ async def direct(client, message):
                             },
                         },
                     )
+                    if SETTINGS["bridge_enabled"]:
+                        url = "https://webhooks.meower.org/post/home"
+
+                        payload = json.dumps({
+                            "username": "SplashBridge",
+                            "post": client.username + ": " + str(message["val"]["val"]["p"]).strip()
+                        })
+                        headers = {
+                            'Content-Type': 'application/json'
+                        }
+
+                        response = requests.request("POST", url, headers=headers, data=payload, timeout=5)
+                        Info("Response from Meower: ", str(response.json()) if response.json() else "No response.", ", statuscode: ", str(response.status_code))
                 case "delete":
                     Info(
                         f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
