@@ -31,6 +31,7 @@ class OceanDB:
             db_name (str): The name of the database.
         """
         self.db_name = db_name
+        print(f"{db_name}.sqlite")
         self.conn = sqlite3.connect(f"{db_name}.sqlite")
         self.cursor = self.conn.cursor()
         Info(f"Connected to {db_name}.sqlite!")
