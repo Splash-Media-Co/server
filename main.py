@@ -121,10 +121,7 @@ async def direct(client, message):
                             "POST", url, headers=headers, data=payload, timeout=5
                         )
                         Info(
-                            "Response from Meower: ",
-                            str(response.json()) if response.json() else "No response.",
-                            ", statuscode: ",
-                            str(response.status_code),
+                            "Response from Meower: " + "No response." + ", statuscode: " + str(response.status_code),
                         )
                 case "delete":
                     Info(
