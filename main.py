@@ -127,7 +127,7 @@ async def direct(client, message):
                     returnposts = []
                     for i in range(len(posts)):
                         returnposts.append(posts[-i + 1])
-                        if i == 20:
+                        if i == 19:
                             break
                     server.send_packet_unicast(
                         client,
