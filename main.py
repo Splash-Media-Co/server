@@ -143,7 +143,6 @@ async def direct(client, message):
                                     },
                                 },
                             },
-                        },
                     )
                     if SETTINGS["bridge_enabled"]:
                         url = "https://webhooks.meower.org/post/home"
