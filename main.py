@@ -143,7 +143,6 @@ async def direct(client, message):
                         },
                     )
                     returnposts.sort(key=timestampsort, reverse=False)
-                    print("sent")
 
 
 @server.on_message
