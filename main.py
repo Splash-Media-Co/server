@@ -17,6 +17,10 @@ import datetime  # noqa: F401
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
 
+# Import requests and json libraries
+import requests
+import json
+
 # Import UUID helpers
 import uuid
 
@@ -31,9 +35,14 @@ import os
 # Instantiate the server object
 server = server()
 
+
+# create this function
+def timestampsort(e):
+    return e[1]
+
+
 # Instantiate the OwODB object
 db = OceanDB("db")
-
 # Set logging level
 server.logging.basicConfig(
     level=server.logging.DEBUG  # See python's logging library for details on logging levels.
@@ -47,6 +56,8 @@ scratch = scratch(server)
 KEY = os.getenv("KEY")
 
 authenticated_clients = []
+
+SETTINGS = {"bridge_enabled": True}
 
 
 @server.on_connect
@@ -132,6 +143,29 @@ async def direct(client, message):
                                     },
                                 },
                             },
+                        },
+                    )
+                    if SETTINGS["bridge_enabled"]:
+                        url = "https://webhooks.meower.org/post/home"
+
+                        payload = json.dumps(
+                            {
+                                "username": "SplashBridge",
+                                "post": client.username
+                                + ": "
+                                + str(message["val"]["val"]["p"]).strip(),
+                            }
+                        )
+                        headers = {"Content-Type": "application/json"}
+
+                        response = requests.request(
+                            "POST", url, headers=headers, data=payload, timeout=5
+                        )
+                        Info(
+                            "Response from Meower: "
+                            + "No response."
+                            + ", statuscode: "
+                            + str(response.status_code),
                         )
                 case "delete":
                     if client.id not in authenticated_clients:
@@ -220,7 +254,32 @@ async def direct(client, message):
                         },
                     },
                 )
-
+        case "retrieve":
+            match str(message["val"]["val"]["type"]):
+                case "latest":
+                    chat_id = message["val"]["val"]["c"]
+                    offset = message["val"]["val"]["o"]
+                    Info(
+                        f"Client {str(client.id)} retrieved latest messages: chat_id: {chat_id}, offset: {offset}"
+                    )
+                    posts = db.select_data("posts", conditions={"post_origin": chat_id})
+                    # print(posts)
+                    returnposts = []
+                    for i in range(len(posts)):
+                        returnposts.append(posts[-i + 1])
+                        if i == 19:
+                            break
+                    server.send_packet_unicast(
+                        client,
+                        {
+                            "cmd": "pmsg",
+                            "val": {
+                                "cmd": "posts",
+                                "val": {"posts": returnposts},
+                            },
+                        },
+                    )
+                    returnposts.sort(key=timestampsort, reverse=False)
 
 @server.on_message
 async def msg(client, message):
