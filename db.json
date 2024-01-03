@@ -18,5 +18,6 @@
      "isDeleted?":"BOOL",
      "post_origin":"TEXT",
      "type":"TEXT"
+     "attachment":"TEXT"
   }
 }

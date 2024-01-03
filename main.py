@@ -78,6 +78,10 @@ async def direct(client, message):
                         f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
                     )
                     uid = str(uuid.uuid4())
+                    try:
+                        attachment = str(message["val"]["val"]["attachment"])
+                    except KeyError:
+                        attachment = ""
                     db.insert_data(
                         "posts",
                         (
@@ -88,6 +92,7 @@ async def direct(client, message):
                             False,
                             "home",
                             str(message["val"]["val"]["type"]),
+                            attachment,
                         ),
                     )
                     server.send_packet_multicast(
@@ -100,21 +105,32 @@ async def direct(client, message):
                                     "author": client.username,
                                     "post_content": str(message["val"]["val"]["p"]),
                                     "uid": uid,
+                                    "attachment": attachment,
                                 },
                             },
                         },
                     )
                     if SETTINGS["bridge_enabled"]:
                         url = "https://webhooks.meower.org/post/home"
-
-                        payload = json.dumps(
-                            {
-                                "username": "SplashBridge",
-                                "post": client.username
-                                + ": "
-                                + str(message["val"]["val"]["p"]).strip(),
-                            }
-                        )
+                        if attachment == "":
+                            payload = json.dumps(
+                                {
+                                    "username": "SplashBridge",
+                                    "post": client.username
+                                    + ": "
+                                    + str(message["val"]["val"]["p"]).strip(),
+                                }
+                            )
+                        else:
+                            payload = json.dumps(
+                                {
+                                    "username": "SplashBridge",
+                                    "post": client.username
+                                    + ": "
+                                    + str(message["val"]["val"]["p"]).strip()
+                                    + str(f"[image: {attachment}]"),
+                                }
+                            )
                         headers = {"Content-Type": "application/json"}
 
                         response = requests.request(
@@ -130,9 +146,8 @@ async def direct(client, message):
                     Info(
                         f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
                     )
-                    db.update_data(
+                    db.delete_data(
                         "posts",
-                        {"isDeleted": True},
                         {"uid": str(message["val"]["val"]["uid"])},
                     )
                     server.send_packet_multicast(
