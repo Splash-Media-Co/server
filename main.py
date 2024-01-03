@@ -92,7 +92,7 @@ async def direct(client, message):
                             False,
                             "home",
                             str(message["val"]["val"]["type"]),
-                            attachment
+                            attachment,
                         ),
                     )
                     server.send_packet_multicast(
@@ -105,7 +105,7 @@ async def direct(client, message):
                                     "author": client.username,
                                     "post_content": str(message["val"]["val"]["p"]),
                                     "uid": uid,
-                                    "attachment":attachment
+                                    "attachment": attachment,
                                 },
                             },
                         },
@@ -115,20 +115,20 @@ async def direct(client, message):
                         if attachment == "":
                             payload = json.dumps(
                                 {
-                                "username": "SplashBridge",
-                                "post": client.username
-                                + ": "
-                                + str(message["val"]["val"]["p"]).strip(),
+                                    "username": "SplashBridge",
+                                    "post": client.username
+                                    + ": "
+                                    + str(message["val"]["val"]["p"]).strip(),
                                 }
                             )
                         else:
                             payload = json.dumps(
                                 {
-                                "username": "SplashBridge",
-                                "post": client.username
-                                + ": "
-                                + str(message["val"]["val"]["p"]).strip()
-                                + str(f"[image: {attachment}]")
+                                    "username": "SplashBridge",
+                                    "post": client.username
+                                    + ": "
+                                    + str(message["val"]["val"]["p"]).strip()
+                                    + str(f"[image: {attachment}]"),
                                 }
                             )
                         headers = {"Content-Type": "application/json"}
