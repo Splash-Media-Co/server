@@ -2,7 +2,7 @@
 from cloudlink import server
 
 # Import multithreading
-from multiprocessing import Process # noqa: F401
+from multiprocessing import Process  # noqa: F401
 
 # Import meowerbot
 from MeowerBot import Bot, cbids
@@ -18,8 +18,8 @@ import datetime  # noqa: F401
 from oceandb import OceanDB
 
 # Import requests and json libraries
-import requests # noqa: F401
-import json # noqa: F401
+import requests  # noqa: F401
+import json  # noqa: F401
 
 # Import UUID helpers
 import uuid
@@ -42,6 +42,7 @@ server = server()
 # create this function
 def timestampsort(e):
     return e[1]
+
 
 # Instantiate the OwODB object
 db = OceanDB("db")
@@ -220,6 +221,7 @@ signal.signal(signal.SIGINT, signal_handler)
 
 bot = Bot()
 
+
 @bot.listen(cbids.message)
 async def message(message):
     Info("Message received from " + message.user.username)
@@ -243,6 +245,7 @@ async def message(message):
 def run_bot():
     Info("Started MeowerBot")
     bot.run(os.getenv("username"), os.getenv("pswd"))
+
 
 if __name__ == "__main__":
     server_process = Process(target=run_bot)
