@@ -1,8 +1,8 @@
 # Import the server
 from cloudlink import server
 
-# Import multithreading
-from multiprocessing import Process  # noqa: F401
+# Import multiprocessing
+from multiprocessing import Process, Queue # noqa: F401
 
 # Import meowerbot
 from MeowerBot import Bot, cbids
@@ -122,37 +122,8 @@ async def direct(client, message):
                         },
                     )
                     if SETTINGS["bridge_enabled"]:
-                        url = "https://webhooks.meower.org/post/home"
-                        if attachment == "":
-                            payload = json.dumps(
-                                {
-                                    "username": "SplashBridge",
-                                    "post": client.username
-                                    + ": "
-                                    + str(message["val"]["val"]["p"]).strip(),
-                                }
-                            )
-                        else:
-                            payload = json.dumps(
-                                {
-                                    "username": "SplashBridge",
-                                    "post": client.username
-                                    + ": "
-                                    + str(message["val"]["val"]["p"]).strip()
-                                    + str(f"[image: {attachment}]"),
-                                }
-                            )
-                        headers = {"Content-Type": "application/json"}
-
-                        response = requests.request(
-                            "POST", url, headers=headers, data=payload, timeout=5
-                        )
-                        Info(
-                            "Response from Meower: "
-                            + "No response."
-                            + ", statuscode: "
-                            + str(response.status_code),
-                        )
+                        await bot.api.send_post("home", client.username + ": " + str(message["val"]["val"]["p"]))
+                        
                 case "delete":
                     Info(
                         f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
@@ -224,6 +195,7 @@ bot = Bot()
 
 @bot.listen(cbids.message)
 async def message(message):
+    global server
     Info("Message received from " + message.user.username)
     print(message.data)
     server.send_packet_multicast(
@@ -235,6 +207,8 @@ async def message(message):
                 "val": {
                     "author": message.user.username,
                     "post_content": str(message.data),
+                    "attachment": "",
+                    "uid": message.post_id
                 },
             },
         },
