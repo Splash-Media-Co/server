@@ -208,7 +208,7 @@ async def message(message):
                     "author": message.user.username,
                     "post_content": str(message.data),
                     "attachment": "",
-                    "uid": message.post_id
+                    "uid": message.id
                 },
             },
         },
