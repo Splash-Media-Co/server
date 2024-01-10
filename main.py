@@ -9,11 +9,11 @@ import time  # noqa: F401
 import datetime  # noqa: F401
 
 # Import DB handler
-from oceandb import OceanDB  # noqa: F401
+from oceandb import OceanDB
 
 # Import requests and json libraries
-import requests
-import json
+import requests # noqa: F401
+import json # noqa: F401
 
 # Import UUID helpers
 import uuid
@@ -32,7 +32,6 @@ server = server()
 # create this function
 def timestampsort(e):
     return e[1]
-
 
 # Instantiate the OwODB object
 db = OceanDB("db")
@@ -210,5 +209,3 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
-# Start the server!
-server.run(ip="127.0.0.1", port=3000)
