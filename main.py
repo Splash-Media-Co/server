@@ -2,7 +2,7 @@
 from cloudlink import server
 
 # Import multiprocessing
-from multiprocessing import Process, Queue # noqa: F401
+from multiprocessing import Process, Queue  # noqa: F401
 
 # Import meowerbot
 from MeowerBot import Bot, cbids
@@ -122,8 +122,11 @@ async def direct(client, message):
                         },
                     )
                     if SETTINGS["bridge_enabled"]:
-                        await bot.api.send_post("home", client.username + ": " + str(message["val"]["val"]["p"]))
-                        
+                        await bot.api.send_post(
+                            "home",
+                            client.username + ": " + str(message["val"]["val"]["p"]),
+                        )
+
                 case "delete":
                     Info(
                         f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
@@ -208,7 +211,7 @@ async def message(message):
                     "author": message.user.username,
                     "post_content": str(message.data),
                     "attachment": "",
-                    "uid": message.id
+                    "uid": message.id,
                 },
             },
         },
