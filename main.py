@@ -1,6 +1,12 @@
 # Import the server
 from cloudlink import server
 
+# Import multithreading
+from multiprocessing import Process # noqa: F401
+
+# Import meowerbot
+from MeowerBot import Bot, cbids
+
 # Import logging helpers
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
 
@@ -21,9 +27,13 @@ import uuid
 # Import protocols
 from cloudlink.server.protocols import clpv4, scratch
 
-# Import signal handling and sys
+# Import signal handling, sys, and os
 import signal
 import sys
+import os
+
+# Import dotenv
+from dotenv import load_dotenv
 
 # Instantiate the server object
 server = server()
@@ -40,9 +50,10 @@ server.logging.basicConfig(
     level=server.logging.DEBUG  # See python's logging library for details on logging levels.
 )
 
-# Load protocols
+# Load protocols and dotenv
 clpv4 = clpv4(server)
 scratch = scratch(server)
+load_dotenv()
 
 SETTINGS = {"bridge_enabled": True}
 
@@ -197,8 +208,6 @@ async def msg(client, message):
     Info(str(message))
 """
 
-Info("Started server!")
-
 
 def signal_handler(sig, frame):
     print("\n")
@@ -209,3 +218,40 @@ def signal_handler(sig, frame):
 
 signal.signal(signal.SIGINT, signal_handler)
 
+bot = Bot()
+
+@bot.listen(cbids.message)
+async def message(message):
+    Info("Message received from " + message.user.username)
+    print(message.data)
+    server.send_packet_multicast(
+        server.clients_manager.clients,
+        {
+            "cmd": "gmsg",
+            "val": {
+                "cmd": "bridged",
+                "val": {
+                    "author": message.user.username,
+                    "post_content": str(message.data),
+                },
+            },
+        },
+    )
+
+
+# Start the server in a separate process
+def run_bot():
+    Info("Started MeowerBot")
+    bot.run(os.getenv("username"), os.getenv("pswd"))
+
+if __name__ == "__main__":
+    server_process = Process(target=run_bot)
+    server_process.start()
+
+    try:
+        server.run()
+    except Exception:
+        pass
+    finally:
+        server_process.terminate()
+        os._exit(0)
