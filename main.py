@@ -112,25 +112,16 @@ async def direct(client, message):
                     )
                     if SETTINGS["bridge_enabled"]:
                         url = "https://webhooks.meower.org/post/home"
-                        if attachment == "":
-                            payload = json.dumps(
-                                {
-                                    "username": "SplashBridge",
-                                    "post": client.username
-                                    + ": "
-                                    + str(message["val"]["val"]["p"]).strip(),
-                                }
-                            )
-                        else:
-                            payload = json.dumps(
-                                {
-                                    "username": "SplashBridge",
-                                    "post": client.username
-                                    + ": "
-                                    + str(message["val"]["val"]["p"]).strip()
-                                    + str(f"[image: {attachment}]"),
-                                }
-                            )
+                        payload = json.dumps(
+                            {
+                                "username": "SplashBridge",
+                                "post": client.username
+                                + ": "
+                                + str(message["val"]["val"]["p"]).strip()
+                                + ("" if attachment == "" else str(f"[image: {attachment}]")),
+                            }
+                        )
+
                         headers = {"Content-Type": "application/json"}
 
                         response = requests.request(
