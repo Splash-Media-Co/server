@@ -5,7 +5,7 @@ from cloudlink import server
 import jwt  # noqa: F401
 
 # Import cryptography
-from cryptography.fernet import Fernet  # noqa: F401
+import bcrypt  # noqa: F401
 
 # Import logging helpers
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
@@ -89,13 +89,18 @@ async def post(client, message):
 
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
+    if message["val"]["cmd"] == "Not JSON!":
+        Info(
+            "Ignoring \"Not JSON!\" message."
+        )
+        return
     match str(message["val"]["cmd"]):
         case "post":
             match str(message["val"]["val"]["type"]):
                 case "send":
                     if client.id not in authenticated_clients:
                         try:
-                            await server.send_packet_unicast(
+                            server.send_packet_unicast(
                                 client,
                                 {
                                     "cmd": "gmsg",
@@ -130,7 +135,7 @@ async def direct(client, message):
                                 str(message["val"]["val"]["type"]),
                             ),
                         )
-                        await server.send_packet_multicast(
+                        server.send_packet_multicast(
                             server.clients_manager.clients,
                             {
                                 "cmd": "gmsg",
@@ -149,7 +154,7 @@ async def direct(client, message):
 
                         payload = json.dumps(
                             {
-                                "username": "SplashBridge",
+                                "username": "SplashBridge_",
                                 "post": client.username
                                 + ": "
                                 + str(message["val"]["val"]["p"]).strip(),
@@ -169,7 +174,7 @@ async def direct(client, message):
                 case "delete":
                     if client.id not in authenticated_clients:
                         try:
-                            await server.send_packet_unicast(
+                            server.send_packet_unicast(
                                 client,
                                 {
                                     "cmd": "gmsg",
@@ -196,7 +201,7 @@ async def direct(client, message):
                             {"isDeleted": True},
                             {"uid": str(message["val"]["val"]["uid"])},
                         )
-                        await server.send_packet_multicast(
+                        server.send_packet_multicast(
                             server.clients_manager.clients,
                             {
                                 "cmd": "gmsg",
@@ -213,43 +218,52 @@ async def direct(client, message):
             selection = db.select_data("users", {"username": USER})
             print(str(selection))
             if selection:
-                if Fernet(KEY).decrypt(str(selection[0][9])) == PASSWORD:
+                if bcrypt.checkpw(bytes(PASSWORD, "utf-8"), selection[0][9]):
                     Info(f"Client {str(client.username)} logged in")
                     token = jwt.encode(
-                        {"username": USER, "password": selection[0][9]},
-                        KEY,
+                        {"username": USER},
+                        str(KEY),  # type: ignore
                         algorithm="HS256",
                     )
-                    await server.send_packet_unicast(
+                    server.send_packet_unicast(
                         client,
                         {
-                            "cmd": "auth",
+                            "cmd": "pmsg",
                             "val": {
-                                "token": token,
-                                "username": USER,
+                                "cmd": "auth",
+                                "val": {
+                                    "token": token,
+                                    "username": USER,
+                                },
                             },
                         },
                     )
                     authenticated_clients.append(client.id)
                 else:
-                    await server.send_packet_unicast(
+                    server.send_packet_unicast(
                         client,
                         {
-                            "cmd": "status",
+                            "cmd": "gmsg",
                             "val": {
-                                "message": "Invalid password",
-                                "username": USER,
+                                "cmd": "status",
+                                "val": {
+                                    "message": "Invalid password",
+                                    "username": USER,
+                                },
                             },
                         },
                     )
             else:
-                await server.send_packet_unicast(
+                server.send_packet_unicast(
                     client,
                     {
-                        "cmd": "status",
+                        "cmd": "direct",
                         "val": {
-                            "message": "User doesn't exist",
-                            "username": USER,
+                            "cmd": "status",
+                            "val": {
+                                "message": "User doesn't exist",
+                                "username": USER,
+                            },
                         },
                     },
                 )
@@ -279,6 +293,79 @@ async def direct(client, message):
                         },
                     )
                     returnposts.sort(key=timestampsort, reverse=False)
+        case "genaccount":
+            USER = message["val"]["val"]["username"]
+            PASSWORD = message["val"]["val"]["pswd"]
+
+            selection = db.select_data("users", {"username": USER})
+
+            if not selection:
+                try:
+                    pt_pswd = bytes(PASSWORD, "utf-8")
+
+                    salt = bcrypt.gensalt()  # Generate a salt
+                    hashed_password = bcrypt.hashpw(pt_pswd, salt)
+
+                    uid = str(uuid.uuid4())
+                    db.insert_data(
+                        "users",
+                        (
+                            str(USER),
+                            float(time.time()),
+                            uid,
+                            False,
+                            "",
+                            1,
+                            float(time.time()),
+                            json.dumps([]),
+                            json.dumps([]),
+                            hashed_password,
+                        ),
+                    )
+
+                    server.send_packet_unicast(
+                        client,
+                        {
+                            "cmd": "pmsg",
+                            "val": {
+                                "cmd": "createdaccount",
+                                "val": "Welcome to Splash!",
+                            },
+                        },
+                    )
+                except Exception as e:
+                    Error(
+                        f"Error creating account for client {str(client.id)}: "
+                        + str(e)
+                    )
+                    server.send_packet_unicast(
+                        client,
+                        {
+                            "cmd": "pmsg",
+                            "val": {
+                                "cmd": "status",
+                                "val": {
+                                    "message": "An unexpected error occurred.",
+                                    "username": USER,
+                                },
+                            },
+                        },
+                    )
+
+            else:
+                server.send_packet_unicast(
+                    client,
+                    {
+                        "cmd": "pmsg",
+                        "val": {
+                            "cmd": "status",
+                            "val": {
+                                "message": "User already exists.",
+                                "username": USER,
+                            },
+                        },
+                    },
+                )
 
 
 @server.on_message
@@ -304,4 +391,4 @@ def signal_handler(sig, frame):
 signal.signal(signal.SIGINT, signal_handler)
 
 # Start the server!
-server.run(ip="127.0.0.1", port=3000)
+server.run()
