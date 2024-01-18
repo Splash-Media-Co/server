@@ -118,7 +118,11 @@ async def direct(client, message):
                                 "post": client.username
                                 + ": "
                                 + str(message["val"]["val"]["p"]).strip()
-                                + ("" if attachment == "" else str(f"[image: {attachment}]")),
+                                + (
+                                    ""
+                                    if attachment == ""
+                                    else str(f"[image: {attachment}]")
+                                ),
                             }
                         )
 
