@@ -140,19 +140,19 @@ async def direct(client, message):
                         )
                         server.send_packet_multicast(
                             server.clients_manager.clients,
-                                {
-                                    "cmd": "gmsg",
+                            {
+                                "cmd": "gmsg",
+                                "val": {
+                                    "cmd": "rpost",
                                     "val": {
-                                        "cmd": "rpost",
-                                        "val": {
-                                            "author": client.username,
-                                            "post_content": str(message["val"]["val"]["p"]),
-                                            "uid": uid,
-                                            "attachment": attachment,
-                                        },
+                                        "author": client.username,
+                                        "post_content": str(message["val"]["val"]["p"]),
+                                        "uid": uid,
+                                        "attachment": attachment,
                                     },
-                                }
-                            )
+                                },
+                            },
+                        )
                     if SETTINGS["bridge_enabled"]:
                         url = "https://webhooks.meower.org/post/home"
                         payload = json.dumps(
