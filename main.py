@@ -90,9 +90,7 @@ async def post(client, message):
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
     if message["val"]["cmd"] == "Not JSON!":
-        Info(
-            "Ignoring \"Not JSON!\" message."
-        )
+        Info('Ignoring "Not JSON!" message.')
         return
     match str(message["val"]["cmd"]):
         case "post":
@@ -335,8 +333,7 @@ async def direct(client, message):
                     )
                 except Exception as e:
                     Error(
-                        f"Error creating account for client {str(client.id)}: "
-                        + str(e)
+                        f"Error creating account for client {str(client.id)}: " + str(e)
                     )
                     server.send_packet_unicast(
                         client,
