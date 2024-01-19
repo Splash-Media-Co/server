@@ -339,7 +339,10 @@ async def direct(client, message):
                             else:
                                 db.update_data(
                                     "posts",
-                                    {"content": str(message["val"]["val"]["edit"]), "edited_at": time.time()},
+                                    {
+                                        "content": str(message["val"]["val"]["edit"]),
+                                        "edited_at": time.time(),
+                                    },
                                     {"uid": str(message["val"]["val"]["uid"])},
                                 )
                                 server.send_packet_multicast(
@@ -356,18 +359,18 @@ async def direct(client, message):
                                 )
                         else:
                             server.send_packet_unicast(
-                                    client,
-                                    {
-                                        "cmd": "gmsg",
+                                client,
+                                {
+                                    "cmd": "gmsg",
+                                    "val": {
+                                        "cmd": "status",
                                         "val": {
-                                            "cmd": "status",
-                                            "val": {
-                                                "message": "Post not found",
-                                                "username": client.username,
-                                            },
+                                            "message": "Post not found",
+                                            "username": client.username,
                                         },
                                     },
-                                )
+                                },
+                            )
                             audit.log_action(
                                 "edit_fail",
                                 client.username,
