@@ -280,6 +280,99 @@ async def direct(client, message):
                                 client.username,
                                 f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
                             )
+                case "edit":
+                    if client.id not in authenticated_clients:
+                        try:
+                            server.send_packet_unicast(
+                                client,
+                                {
+                                    "cmd": "gmsg",
+                                    "val": {
+                                        "cmd": "status",
+                                        "val": {
+                                            "message": "Not authenticated",
+                                            "username": client.username,
+                                        },
+                                    },
+                                },
+                            )
+                            audit.log_action(
+                                "edit_fail",
+                                client.username,
+                                f"User tried to edit a post with UID {str(message["val"]["val"]["uid"])} while not being authenticated",
+                            )
+                        except Exception as e:
+                            Error(
+                                f"Error sending message to client {str(client)}: "
+                                + str(e)
+                            )
+                            audit.log_action(
+                                "send_to_client_fail",
+                                client.username,
+                                f"Tried to post to client with error {e}",
+                            )
+                    else:
+                        selection = db.select_data(
+                            "posts",
+                            conditions={"uid": str(message["val"]["val"]["uid"])},
+                        )
+                        if selection:
+                            if selection[0][0] is not client.username:
+                                server.send_packet_unicast(
+                                    client,
+                                    {
+                                        "cmd": "gmsg",
+                                        "val": {
+                                            "cmd": "status",
+                                            "val": {
+                                                "message": "Not authorized",
+                                                "username": client.username,
+                                            },
+                                        },
+                                    },
+                                )
+                                audit.log_action(
+                                    "edit_fail",
+                                    client.username,
+                                    f"User tried to edit a post with UID {str(message["val"]["val"]["uid"])} that doesn't belong to their account",
+                                )
+                            else:
+                                db.update_data(
+                                    "posts",
+                                    {"content": str(message["val"]["val"]["edit"]), "edited_at": time.time()},
+                                    {"uid": str(message["val"]["val"]["uid"])},
+                                )
+                                server.send_packet_multicast(
+                                    server.clients_manager.clients,
+                                    {
+                                        "cmd": "gmsg",
+                                        "val": {
+                                            "cmd": "rdel",
+                                            "val": {
+                                                "uid": str(message["val"]["val"]["uid"])
+                                            },
+                                        },
+                                    },
+                                )
+                        else:
+                            server.send_packet_unicast(
+                                    client,
+                                    {
+                                        "cmd": "gmsg",
+                                        "val": {
+                                            "cmd": "status",
+                                            "val": {
+                                                "message": "Post not found",
+                                                "username": client.username,
+                                            },
+                                        },
+                                    },
+                                )
+                            audit.log_action(
+                                "edit_fail",
+                                client.username,
+                                f"User tried to edit a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
+                            )
 
         case "auth":
             USER = message["val"]["val"]["username"]
