@@ -65,7 +65,7 @@ The Splash server is responsible for handling various commands from clients, suc
 
 #### Payload
 ```json
-{"cmd": "retrieve", "val": {"type": "latest", "c": "ChatID", "o": Offset}}
+{"cmd": "retrieve", "val": {"type": "latest", "c": "ChatID", "o": "Offset"}}
 ```
 
 - **Description**: Retrieve posts.
