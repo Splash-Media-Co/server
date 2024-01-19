@@ -132,7 +132,7 @@ async def direct(client, message):
                                 "home",
                                 str(message["val"]["val"]["type"]),
                                 attachment,
-                                "NULL"
+                                "NULL",
                             ),
                         )
                         server.send_packet_multicast(
