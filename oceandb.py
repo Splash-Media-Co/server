@@ -45,10 +45,10 @@ class OceanDB:
                 sql = f"CREATE TABLE IF NOT EXISTS {table} ("
                 for name, type in columns.items():
                     sql += f"{name} {type}, "
-                
+
                 # Trim trailing comma and add closing parenthesis
                 sql = sql[:-2] + ")"
-                
+
                 self.cursor.execute(sql)
                 self.commit()
 
@@ -68,7 +68,9 @@ class OceanDB:
         Returns:
             bool: True if the table exists, False otherwise.
         """
-        self.cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name = '{table_name}'")
+        self.cursor.execute(
+            f"SELECT name FROM sqlite_master WHERE type='table' AND name = '{table_name}'"
+        )
         return bool(self.cursor.fetchone())
 
     def insert_data(self, table_name: str, values: tuple) -> None:
