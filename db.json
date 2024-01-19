@@ -1,24 +1,25 @@
 {
-  "users":{
-     "username":"VARCHAR",
-     "creation_date":"BIGINT",
-     "uuid":"VARCHAR",
-     "banned":"BOOL",
-     "quote":"VARCHAR",
-     "pfpid":"INTEGER",
-     "lastseen":"BIGINT",
-     "badgeids":"VARCHAR",
-     "extraflags":"VARCHAR",
-     "password": "VARCHAR"
+  "users": {
+    "username": "VARCHAR",
+    "creation_date": "BIGINT",
+    "uuid": "VARCHAR",
+    "banned": "BOOL",
+    "quote": "VARCHAR",
+    "pfpid": "INTEGER",
+    "lastseen": "BIGINT",
+    "badgeids": "VARCHAR",
+    "extraflags": "VARCHAR",
+    "password": "VARCHAR"
   },
-  "posts":{
-     "author":"VARCHAR",
-     "creation_date":"BIGINT",
-     "uid":"VARCHAR",
-     "content":"VARCHAR",
-     "isDeleted":"BOOL",
-     "post_origin":"VARCHAR",
-     "type":"VARCHAR",
-     "attachment":"VARCHAR"
+  "posts": {
+    "author": "VARCHAR",
+    "creation_date": "BIGINT",
+    "uid": "VARCHAR",
+    "content": "VARCHAR",
+    "isDeleted": "BOOL",
+    "post_origin": "VARCHAR",
+    "type": "VARCHAR",
+    "attachment": "VARCHAR",
+    "edited_at": "BIGINT"
   }
 }

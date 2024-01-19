@@ -1,36 +1,37 @@
 # Import the server
-from cloudlink import server
-
-# Import JSON Web token handler
-import jwt  # noqa: F401
-
-# Import cryptography
-import bcrypt  # noqa: F401
-
-# Import logging helpers
-from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
-
-# Import time handlers
-import time  # noqa: F401
 import datetime  # noqa: F401
-
-# Import DB handler
-from oceandb import OceanDB  # noqa: F401
-
-# Import requests and json libraries
-import requests
 import json
-
-# Import UUID helpers
-import uuid
-
-# Import protocols
-from cloudlink.server.protocols import clpv4, scratch
+import os
 
 # Import signal handling, sys, and os
 import signal
 import sys
-import os
+
+# Import time handlers
+import time  # noqa: F401
+
+# Import UUID helpers
+import uuid
+
+# Import cryptography
+import bcrypt  # noqa: F401
+
+# Import JSON Web token handler
+import jwt  # noqa: F401
+
+# Import requests and json libraries
+import requests
+from cloudlink import server
+
+# Import protocols
+from cloudlink.server.protocols import clpv4, scratch
+
+# Import logging helpers and OceanAudit
+from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
+from oceanaudit import OceanAuditLogger
+
+# Import DB handler
+from oceandb import OceanDB  # noqa: F401
 
 # Instantiate the server object
 server = server()
@@ -41,8 +42,10 @@ def timestampsort(e):
     return e[1]
 
 
-# Instantiate the OwODB object
+# Instantiate the OceanDB object and OceanAuditLogger object
 db = OceanDB("db")
+audit = OceanAuditLogger()
+
 # Set logging level
 server.logging.basicConfig(
     level=server.logging.DEBUG  # See python's logging library for details on logging levels.
@@ -72,25 +75,11 @@ async def on_disconnect(client):
         authenticated_clients.remove(client.id)
 
 
-"""
-type: int containing post mode (see Notes)
-p: string, content of the post
-t: Object containing time details + timestamp
-post_id: id of the post (made srv-side, don't send)
-"""
-
-
-@server.on_command(cmd="post", schema=clpv4.schema)
-async def post(client, message):
-    Info(
-        f"Client {str(client)} sent message: Post: {str(message["val"]["p"])}, mode: {str(message["val"]["type"])}, timestamp: {str(message["val"]["t"])}"
-    )
-
-
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
-    if message["val"]["cmd"] == "Not JSON!":
+    if message == "Not JSON!":
         Info('Ignoring "Not JSON!" message.')
+
         return
     match str(message["val"]["cmd"]):
         case "post":
@@ -111,15 +100,22 @@ async def direct(client, message):
                                     },
                                 },
                             )
+                            audit.log_action(
+                                "post_fail",
+                                client.username,
+                                f"User tried to post {str(message["val"]["val"]["p"])} while not authenticated",
+                            )
                         except Exception as e:
                             Error(
                                 f"Error sending message to client {str(client)}: "
                                 + str(e)
                             )
+                            audit.log_action(
+                                "send_to_client_fail",
+                                client.username,
+                                f"Tried to post to client with error {e}",
+                            )
                     else:
-                        Info(
-                            f"Client {str(client.id)} sent message: Post: {str(message["val"]["val"]["p"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
-                        )
                         uid = str(uuid.uuid4())
                         try:
                             attachment = str(message["val"]["val"]["attachment"])
@@ -152,6 +148,11 @@ async def direct(client, message):
                                     },
                                 },
                             },
+                        )
+                        audit.log_action(
+                            "post",
+                            client.username,
+                            f"User posted {str(message["val"]["val"]["p"])}",
                         )
                         if SETTINGS["bridge_enabled"]:
                             url = "https://webhooks.meower.org/post/home"
@@ -196,30 +197,89 @@ async def direct(client, message):
                                     },
                                 },
                             )
+                            audit.log_action(
+                                "delete_fail",
+                                client.username,
+                                f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} while not being authenticated",
+                            )
                         except Exception as e:
                             Error(
                                 f"Error sending message to client {str(client)}: "
                                 + str(e)
                             )
+                            audit.log_action(
+                                "send_to_client_fail",
+                                client.username,
+                                f"Tried to post to client with error {e}",
+                            )
                     else:
-                        Info(
-                            f"Client {str(client.id)} sent message: UID: {str(message["val"]["val"]["uid"])}, mode: {str(message["val"]["val"]["type"])}, timestamp: {float(time.time())}"
-                        )
-                        db.update_data(
+                        selection = db.select_data(
                             "posts",
-                            {"isDeleted": True},
-                            {"uid": str(message["val"]["val"]["uid"])},
+                            conditions={"uid": str(message["val"]["val"]["uid"])},
                         )
-                        server.send_packet_multicast(
-                            server.clients_manager.clients,
-                            {
-                                "cmd": "gmsg",
-                                "val": {
-                                    "cmd": "rdel",
-                                    "val": {"uid": str(message["val"]["val"]["uid"])},
+                        if selection:
+                            if selection[0][0] is not client.username:
+                                server.send_packet_unicast(
+                                    client,
+                                    {
+                                        "cmd": "gmsg",
+                                        "val": {
+                                            "cmd": "status",
+                                            "val": {
+                                                "message": "Not authorized",
+                                                "username": client.username,
+                                            },
+                                        },
+                                    },
+                                )
+                                audit.log_action(
+                                    "delete_fail",
+                                    client.username,
+                                    f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that doesn't belong to their account",
+                                )
+                            else:
+                                db.update_data(
+                                    "posts",
+                                    {"isDeleted": True},
+                                    {"uid": str(message["val"]["val"]["uid"])},
+                                )
+                                server.send_packet_multicast(
+                                    server.clients_manager.clients,
+                                    {
+                                        "cmd": "gmsg",
+                                        "val": {
+                                            "cmd": "rdel",
+                                            "val": {
+                                                "uid": str(message["val"]["val"]["uid"])
+                                            },
+                                        },
+                                    },
+                                )
+                                audit.log_action(
+                                    "delete_fail",
+                                    client.username,
+                                    f"User deleted post with UID {str(message["val"]["val"]["uid"])}",
+                                )
+                        else:
+                            server.send_packet_unicast(
+                                client,
+                                {
+                                    "cmd": "gmsg",
+                                    "val": {
+                                        "cmd": "status",
+                                        "val": {
+                                            "message": "Post not found",
+                                            "username": client.username,
+                                        },
+                                    },
                                 },
-                            },
-                        )
+                            )
+                            audit.log_action(
+                                "delete_fail",
+                                client.username,
+                                f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
+                            )
+
         case "auth":
             USER = message["val"]["val"]["username"]
             PASSWORD = message["val"]["val"]["pswd"]
@@ -247,6 +307,11 @@ async def direct(client, message):
                             },
                         },
                     )
+                    audit.log_action(
+                        "auth",
+                        client.username,
+                        "User authenticated!",
+                    )
                     authenticated_clients.append(client.id)
                 else:
                     server.send_packet_unicast(
@@ -262,6 +327,11 @@ async def direct(client, message):
                             },
                         },
                     )
+                    audit.log_action(
+                        "auth_fail",
+                        client.username,
+                        "User failed to auth because of invalid password",
+                    )
             else:
                 server.send_packet_unicast(
                     client,
@@ -276,6 +346,11 @@ async def direct(client, message):
                         },
                     },
                 )
+                audit.log_action(
+                    "auth_fail",
+                    client.username,
+                    f"User tried to log into {USER} but failed because it doesn't exist",
+                )
         case "retrieve":
             match str(message["val"]["val"]["type"]):
                 case "latest":
@@ -283,6 +358,11 @@ async def direct(client, message):
                     offset = message["val"]["val"]["o"]
                     Info(
                         f"Client {str(client.id)} retrieved latest messages: chat_id: {chat_id}, offset: {offset}"
+                    )
+                    audit.log_action(
+                        "retrieve",
+                        client.username,
+                        f"User retrieved posts with chat id of {chat_id} and offset of {offset}",
                     )
                     posts = db.select_data("posts", conditions={"post_origin": chat_id})
                     # print(posts)
@@ -342,9 +422,19 @@ async def direct(client, message):
                             },
                         },
                     )
+                    audit.log_action(
+                        "created_account",
+                        client.username,
+                        f"User created account {str(USER)}",
+                    )
                 except Exception as e:
                     Error(
                         f"Error creating account for client {str(client.id)}: " + str(e)
+                    )
+                    audit.log_action(
+                        "create_account_fail",
+                        client.username,
+                        f"Failed to create account with username {str(USER)}: {str(e)}",
                     )
                     server.send_packet_unicast(
                         client,
@@ -373,6 +463,11 @@ async def direct(client, message):
                             },
                         },
                     },
+                )
+                audit.log_action(
+                    "create_account_fail",
+                    client.username,
+                    f"Failed to create account with username {str(USER)} because it already exists",
                 )
 
 
