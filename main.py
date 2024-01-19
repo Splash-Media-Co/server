@@ -153,33 +153,33 @@ async def direct(client, message):
                                 },
                             },
                         )
-                    if SETTINGS["bridge_enabled"]:
-                        url = "https://webhooks.meower.org/post/home"
-                        payload = json.dumps(
-                            {
-                                "username": "SplashBridge_",
-                                "post": client.username
-                                + ": "
-                                + str(message["val"]["val"]["p"]).strip()
-                                + (
-                                    ""
-                                    if attachment == ""
-                                    else str(f"[image: {attachment}]")
-                                ),
-                            }
-                        )
+                        if SETTINGS["bridge_enabled"]:
+                            url = "https://webhooks.meower.org/post/home"
+                            payload = json.dumps(
+                                {
+                                    "username": "SplashBridge_",
+                                    "post": client.username
+                                    + ": "
+                                    + str(message["val"]["val"]["p"]).strip()
+                                    + (
+                                        ""
+                                        if attachment == ""
+                                        else str(f"[image: {attachment}]")
+                                    ),
+                                }
+                            )
 
-                        headers = {"Content-Type": "application/json"}
+                            headers = {"Content-Type": "application/json"}
 
-                        response = requests.request(
-                            "POST", url, headers=headers, data=payload, timeout=5
-                        )
-                        Info(
-                            "Response from Meower: "
-                            + "No response."
-                            + ", statuscode: "
-                            + str(response.status_code),
-                        )
+                            response = requests.post(
+                                url, headers=headers, data=payload, timeout=5
+                            )
+                            Info(
+                                "Response from Meower: "
+                                + "No response."
+                                + ", statuscode: "
+                                + str(response.status_code),
+                            )
                 case "delete":
                     if client.id not in authenticated_clients:
                         try:

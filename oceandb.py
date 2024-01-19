@@ -1,5 +1,6 @@
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
 import sqlite3  # noqa: F401
+import json
 
 
 class OceanDB:
@@ -16,6 +17,7 @@ class OceanDB:
 
     Methods:
         commit(): Commit the changes to the database.
+        table_exists(table_name: str) -> bool: Check if a table exists in the database.
         insert_data(table_name: str, values: tuple): Insert data into the specified table.
         select_data(table_name: str, conditions: dict = None) -> list: Retrieve data from the specified table.
         update_data(table_name: str, update_data: dict, conditions: dict = None): Update data in the specified table.
@@ -35,12 +37,39 @@ class OceanDB:
         self.conn = sqlite3.connect(f"{db_name}.sqlite")
         self.cursor = self.conn.cursor()
         Info(f"Connected to {db_name}.sqlite!")
+        with open("db.json", "r") as f:
+            data = json.load(f)
+
+        for table, columns in data.items():
+            if not self.table_exists(table):
+                sql = f"CREATE TABLE IF NOT EXISTS {table} ("
+                for name, type in columns.items():
+                    sql += f"{name} {type}, "
+                
+                # Trim trailing comma and add closing parenthesis
+                sql = sql[:-2] + ")"
+                
+                self.cursor.execute(sql)
+                self.commit()
 
     def commit(self) -> None:
         """
         Commit changes to the database.
         """
         self.conn.commit()
+
+    def table_exists(self, table_name: str) -> bool:
+        """
+        Check if a table exists in the database.
+
+        Args:
+            table_name (str): The name of the table.
+
+        Returns:
+            bool: True if the table exists, False otherwise.
+        """
+        self.cursor.execute(f"SELECT name FROM sqlite_master WHERE type='table' AND name = '{table_name}'")
+        return bool(self.cursor.fetchone())
 
     def insert_data(self, table_name: str, values: tuple) -> None:
         """
