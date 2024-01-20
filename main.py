@@ -426,7 +426,7 @@ async def direct(client, message):
                     server.send_packet_unicast(
                         client,
                         {
-                            "cmd": "gmsg",
+                            "cmd": "pmsg",
                             "val": {
                                 "cmd": "status",
                                 "val": {
@@ -578,6 +578,7 @@ async def direct(client, message):
                     client.username,
                     f"Failed to create account with username {str(USER)} because it already exists",
                 )
+
 
 """@server.on_message
 async def msg(client, message):
