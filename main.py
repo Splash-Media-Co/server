@@ -390,7 +390,7 @@ async def direct(client, message):
                             )
 
         case "auth":
-            USER = message["val"]["val"]["username"]
+            USER = client.username
             PASSWORD = message["val"]["val"]["pswd"]
 
             selection = db.select_data("users", {"username": USER})
@@ -492,7 +492,7 @@ async def direct(client, message):
                     )
                     returnposts.sort(key=timestampsort, reverse=False)
         case "genaccount":
-            USER = message["val"]["val"]["username"]
+            USER = client.username
             PASSWORD = message["val"]["val"]["pswd"]
 
             selection = db.select_data("users", {"username": USER})
