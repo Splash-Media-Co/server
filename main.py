@@ -427,7 +427,7 @@ async def direct(client, message):
                     server.send_packet_unicast(
                         client,
                         {
-                            "cmd": "gmsg",
+                            "cmd": "pmsg",
                             "val": {
                                 "cmd": "status",
                                 "val": {
