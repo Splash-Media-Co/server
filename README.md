@@ -53,12 +53,12 @@ The Splash server is responsible for handling various commands from clients, suc
 
 #### Payload
 ```json
-{"cmd": "auth", "val": {"username": "YourUsername", "pswd": "YourPassword"}}
+{"cmd": "auth", "val": {"pswd": "YourPassword"}}
 ```
 
 - **Description**: Authenticate a user.
 - **Parameters**:
-  - `"username"`: User's username.
+  - (Username set using CloudLink usernames)
   - `"pswd"`: User's password.
 
 ### 3. `retrieve`
@@ -78,12 +78,12 @@ The Splash server is responsible for handling various commands from clients, suc
 
 #### Payload
 ```json
-{"cmd": "genaccount", "val": {"username": "NewUsername", "pswd": "NewPassword"}}
+{"cmd": "genaccount", "val": {"pswd": "NewPassword"}}
 ```
 
 - **Description**: Generate a new user account.
 - **Parameters**:
-  - `"username"`: New user's username.
+  - (Username set using CloudLink usernames)
   - `"pswd"`: New user's password.
 
 ## Error Handling
