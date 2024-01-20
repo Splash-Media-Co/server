@@ -77,9 +77,8 @@ async def on_disconnect(client):
 
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
-    if message == "Not JSON!":
+    if message["val"] == "Not JSON!":
         Info('Ignoring "Not JSON!" message.')
-
         return
     match str(message["val"]["cmd"]):
         case "post":
@@ -579,11 +578,6 @@ async def direct(client, message):
                     client.username,
                     f"Failed to create account with username {str(USER)} because it already exists",
                 )
-
-
-@server.on_message
-async def msg(client, message):
-    Info(str(message))
 
 
 """@server.on_message
