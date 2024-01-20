@@ -579,6 +579,7 @@ async def direct(client, message):
                     f"Failed to create account with username {str(USER)} because it already exists",
                 )
 
+
 """@server.on_message
 async def msg(client, message):
     Info(str(message))
