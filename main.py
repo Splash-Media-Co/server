@@ -155,31 +155,21 @@ async def direct(client, message):
                             f"User posted {str(message["val"]["val"]["p"])}",
                         )
                         if SETTINGS["bridge_enabled"]:
-                            url = "https://webhooks.meower.org/post/home"
-                            payload = json.dumps(
-                                {
-                                    "username": "SplashBridge_",
-                                    "post": client.username
-                                    + ": "
-                                    + str(message["val"]["val"]["p"]).strip()
-                                    + (
-                                        ""
-                                        if attachment == ""
-                                        else str(f"[image: {attachment}]")
-                                    ),
-                                }
+                            url = "https://splashpost.vercel.app/home/"
+                            payload = (
+                                client.username
+                                + ": "
+                                + str(message["val"]["val"]["p"]).strip()
+                                + (
+                                    ""
+                                    if attachment == ""
+                                    else str(f"[image: {attachment}]")
+                                ),
                             )
 
-                            headers = {"Content-Type": "application/json"}
-
-                            response = requests.post(
-                                url, headers=headers, data=payload, timeout=5
-                            )
+                            response = requests.post(url + str(payload[0]), timeout=5)
                             Info(
-                                "Response from Meower: "
-                                + "No response."
-                                + ", statuscode: "
-                                + str(response.status_code),
+                                "Statuscode: " + str(response.status_code),
                             )
                 case "delete":
                     if client.id not in authenticated_clients:
