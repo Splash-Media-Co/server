@@ -19,6 +19,10 @@ import bcrypt  # noqa: F401
 # Import JSON Web token handler
 import jwt  # noqa: F401
 
+# Import paralelized tasks helper
+import concurrent.futures  # noqa: F401
+
+
 # Import requests and json libraries
 import requests
 from cloudlink import server
@@ -37,9 +41,17 @@ from oceandb import OceanDB  # noqa: F401
 server = server()
 
 
-# create this function
+# define timestamp sorting
 def timestampsort(e):
     return e[1]
+
+
+# define paralelized POST request
+def post(url):
+    response = requests.post(url, timeout=5)
+    Info(
+        "Statuscode: " + str(response.status_code),
+    )
 
 
 # Instantiate the OceanDB object and OceanAuditLogger object
@@ -167,10 +179,8 @@ async def direct(client, message):
                                 ),
                             )
 
-                            response = requests.post(url + str(payload[0]), timeout=5)
-                            Info(
-                                "Statuscode: " + str(response.status_code),
-                            )
+                            with concurrent.futures.ProcessPoolExecutor() as executor:
+                                executor.submit(post, url + str(payload[0]))
                 case "delete":
                     if client.id not in authenticated_clients:
                         try:
