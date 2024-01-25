@@ -44,6 +44,7 @@ server = server()
 # Instantiate ratelimiter
 ratelimiter = WebSocketRateLimiter(5, 1)
 
+
 # define timestamp sorting
 def timestampsort(e):
     return e[1]
@@ -93,7 +94,7 @@ async def on_disconnect(client):
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
     if not await ratelimiter.acquire(client.id):
-        Info('Ignoring rate limit')
+        Info("Ignoring rate limit")
         try:
             server.send_packet_unicast(
                 client,
@@ -114,10 +115,7 @@ async def direct(client, message):
                 "User hitted rate limit",
             )
         except Exception as e:
-            Error(
-                f"Error sending message to client {str(client)}: "
-                + str(e)
-            )
+            Error(f"Error sending message to client {str(client)}: " + str(e))
             audit.log_action(
                 "send_to_client_fail",
                 client.username,
