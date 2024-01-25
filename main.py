@@ -30,9 +30,10 @@ from cloudlink import server
 # Import protocols
 from cloudlink.server.protocols import clpv4, scratch
 
-# Import logging helpers and OceanAudit
+# Import logging helpers, OceanAudit, and rate-limiter
 from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
 from oceanaudit import OceanAuditLogger
+from utils import WebSocketRateLimiter
 
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
@@ -40,6 +41,8 @@ from oceandb import OceanDB  # noqa: F401
 # Instantiate the server object
 server = server()
 
+# Instantiate ratelimiter
+ratelimiter = WebSocketRateLimiter(5, 1)
 
 # define timestamp sorting
 def timestampsort(e):
@@ -89,6 +92,38 @@ async def on_disconnect(client):
 
 @server.on_command(cmd="direct", schema=clpv4.schema)
 async def direct(client, message):
+    if not await ratelimiter.acquire(client.id):
+        Info('Ignoring rate limit')
+        try:
+            server.send_packet_unicast(
+                client,
+                {
+                    "cmd": "gmsg",
+                    "val": {
+                        "cmd": "status",
+                        "val": {
+                            "message": "Ratelimited.",
+                            "username": client.username,
+                        },
+                    },
+                },
+            )
+            audit.log_action(
+                "ratelimit",
+                client.username,
+                "User hitted rate limit",
+            )
+        except Exception as e:
+            Error(
+                f"Error sending message to client {str(client)}: "
+                + str(e)
+            )
+            audit.log_action(
+                "send_to_client_fail",
+                client.username,
+                f"Tried to post to client with error {e}",
+            )
+        return
     if message["val"] == "Not JSON!":
         Info('Ignoring "Not JSON!" message.')
         return
