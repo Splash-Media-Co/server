@@ -2,6 +2,7 @@ import json
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
 import sqlite3  # noqa: F401
 
+
 class OceanDB:
     """
     A simple SQLite database wrapper for basic CRUD operations.
