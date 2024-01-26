@@ -1,7 +1,6 @@
+import json
 from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
 import sqlite3  # noqa: F401
-import json
-
 
 class OceanDB:
     """
@@ -23,6 +22,9 @@ class OceanDB:
         update_data(table_name: str, update_data: dict, conditions: dict = None): Update data in the specified table.
         delete_data(table_name: str, conditions: dict = None): Delete data from the specified table.
         close(): Close the database connection.
+        check_and_migrate_schema(json_file: str = "db.json"): Check for schema changes and migrate if needed.
+        migrate_schema_and_data(new_schema: dict): Migrate schema and data.
+
     """
 
     def __init__(self, db_name: str) -> None:
@@ -33,23 +35,58 @@ class OceanDB:
             db_name (str): The name of the database.
         """
         self.db_name = db_name
-        print(f"{db_name}.sqlite")
         self.conn = sqlite3.connect(f"{db_name}.sqlite")
         self.cursor = self.conn.cursor()
         Info(f"Connected to {db_name}.sqlite!")
-        with open("db.json", "r") as f:
-            data = json.load(f)
+        self.check_and_migrate_schema()
 
-        for table, columns in data.items():
+    def check_and_migrate_schema(self, json_file: str = "db.json"):
+        """
+        Check for schema changes and migrate if needed.
+
+        Args:
+            json_file (str): The path to the JSON file containing the desired schema.
+
+        """
+        # Read the current JSON schema
+        with open(json_file, "r") as f:
+            new_schema = json.load(f)
+
+        # Check if the existing schema matches the JSON schema
+        existing_schema = {}
+        self.cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tables = self.cursor.fetchall()
+        for table in tables:
+            table_name = table[0]
+            self.cursor.execute(f"PRAGMA table_info({table_name})")
+            columns = self.cursor.fetchall()
+            existing_schema[table_name] = {col[1]: col[2] for col in columns}
+
+        if existing_schema != new_schema:
+            # Migrate the schema and data
+            self.migrate_schema_and_data(new_schema)
+
+    def migrate_schema_and_data(self, new_schema):
+        """
+        Migrate schema and data.
+
+        Args:
+            new_schema (dict): The desired schema.
+
+        """
+        for table, columns in new_schema.items():
             if not self.table_exists(table):
+                # Table does not exist, create it
                 sql = f"CREATE TABLE IF NOT EXISTS {table} ("
                 for name, type in columns.items():
                     sql += f"{name} {type}, "
-
-                # Trim trailing comma and add closing parenthesis
                 sql = sql[:-2] + ")"
-
                 self.cursor.execute(sql)
+
+                # Migrate data
+                self.cursor.execute(f"INSERT INTO {table} SELECT * FROM {table}_temp")
+                self.cursor.execute(f"DROP TABLE IF EXISTS {table}_temp")
+
                 self.commit()
 
     def commit(self) -> None:
