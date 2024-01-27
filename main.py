@@ -33,7 +33,7 @@ from cloudlink.server.protocols import clpv4, scratch
 # Import logging helpers, OceanAudit, and rate-limiter
 from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
 from oceanaudit import OceanAuditLogger
-from utils import WebSocketRateLimiter
+from utils import WebSocketRateLimiter, is_client_authenticated
 
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
@@ -87,7 +87,7 @@ async def on_connect(client):
 @server.on_disconnect
 async def on_disconnect(client):
     Info(f"Client {str(client.id)} disconnected")
-    if client.id in authenticated_clients:
+    if await is_client_authenticated(client.id, authenticated_clients):
         authenticated_clients.remove(client.id)
 
 
@@ -129,7 +129,7 @@ async def direct(client, message):
         case "post":
             match str(message["val"]["val"]["type"]):
                 case "send":
-                    if client.id not in authenticated_clients:
+                    if not await is_client_authenticated(client.id, authenticated_clients):
                         try:
                             server.send_packet_unicast(
                                 client,
@@ -215,7 +215,7 @@ async def direct(client, message):
                             with concurrent.futures.ProcessPoolExecutor() as executor:
                                 executor.submit(post, url + str(payload[0]))
                 case "delete":
-                    if client.id not in authenticated_clients:
+                    if not await is_client_authenticated(client.id, authenticated_clients):
                         try:
                             server.send_packet_unicast(
                                 client,
@@ -316,7 +316,7 @@ async def direct(client, message):
                                 f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
                             )
                 case "edit":
-                    if client.id not in authenticated_clients:
+                    if not await is_client_authenticated(client.id, authenticated_clients):
                         try:
                             server.send_packet_unicast(
                                 client,
