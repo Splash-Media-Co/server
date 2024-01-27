@@ -129,7 +129,9 @@ async def direct(client, message):
         case "post":
             match str(message["val"]["val"]["type"]):
                 case "send":
-                    if not await is_client_authenticated(client.id, authenticated_clients):
+                    if not await is_client_authenticated(
+                        client.id, authenticated_clients
+                    ):
                         try:
                             server.send_packet_unicast(
                                 client,
@@ -215,7 +217,9 @@ async def direct(client, message):
                             with concurrent.futures.ProcessPoolExecutor() as executor:
                                 executor.submit(post, url + str(payload[0]))
                 case "delete":
-                    if not await is_client_authenticated(client.id, authenticated_clients):
+                    if not await is_client_authenticated(
+                        client.id, authenticated_clients
+                    ):
                         try:
                             server.send_packet_unicast(
                                 client,
@@ -316,7 +320,9 @@ async def direct(client, message):
                                 f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
                             )
                 case "edit":
-                    if not await is_client_authenticated(client.id, authenticated_clients):
+                    if not await is_client_authenticated(
+                        client.id, authenticated_clients
+                    ):
                         try:
                             server.send_packet_unicast(
                                 client,
