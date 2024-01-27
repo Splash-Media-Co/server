@@ -217,9 +217,7 @@ async def direct(client, message):
                             with concurrent.futures.ProcessPoolExecutor() as executor:
                                 executor.submit(post, url + str(payload[0]))
                 case "delete":
-                    if not await is_client_authenticated(
-                        client.id, authenticated_clients
-                    ):
+                    if client.id in authenticated_clients:
                         try:
                             server.send_packet_unicast(
                                 client,
