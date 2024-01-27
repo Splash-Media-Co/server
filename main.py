@@ -318,7 +318,9 @@ async def direct(client, message):
                                 f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
                             )
                 case "edit":
-                    if not await is_client_authenticated(client.id, authenticated_clients):
+                    if not await is_client_authenticated(
+                        client.id, authenticated_clients
+                    ):
                         try:
                             server.send_packet_unicast(
                                 client,
