@@ -1,5 +1,5 @@
 import time
-
+import audit
 
 class WebSocketRateLimiter:
     def __init__(self, rate_limit, time_interval):
@@ -29,3 +29,38 @@ class WebSocketRateLimiter:
             return True
         else:
             return False
+
+async def isAuthenticated(server, client_id, authenticated_clients):
+    if client.id not in authenticated_clients:
+        try:
+            server.send_packet_unicast(
+                client,
+                {
+                    "cmd": "gmsg",
+                    "val": {
+                        "cmd": "status",
+                        "val": {
+                            "message": "Not authenticated",
+                            "username": client.username,
+                        },
+                    },
+                },
+            )
+            audit.log_action(
+                "not_authenticated",
+                client.username,
+                f"User tried to do something {str(message["val"]["val"]["p"])} while not authenticated",
+            )
+            return False
+        except Exception as e:
+            Error(
+                f"Error sending message to client {str(client)}: "
+                + str(e)
+            )
+            audit.log_action(
+                "send_to_client_fail",
+                client.username,
+                f"Tried to post to client with error {e}",
+            )
+    else:
+        return True
