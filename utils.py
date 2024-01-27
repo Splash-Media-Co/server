@@ -29,3 +29,6 @@ class WebSocketRateLimiter:
             return True
         else:
             return False
+
+async def is_client_authenticated(client_id, authenticated_clients):
+    return client_id in authenticated_clients
