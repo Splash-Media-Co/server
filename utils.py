@@ -5,6 +5,7 @@ from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
 # Instantiate the OceanAuditLogger object
 audit = OceanAuditLogger()
 
+
 class WebSocketRateLimiter:
     def __init__(self, rate_limit, time_interval):
         self.rate_limit = rate_limit
@@ -34,6 +35,7 @@ class WebSocketRateLimiter:
         else:
             return False
 
+
 async def isAuthenticated(server, client, authenticated_clients):
     if client.id not in authenticated_clients:
         try:
@@ -56,10 +58,7 @@ async def isAuthenticated(server, client, authenticated_clients):
                 "User tried to do something while not authenticated",
             )
         except Exception as e:
-            Error(
-                f"Error sending message to client {str(client)}: "
-                + str(e)
-            )
+            Error(f"Error sending message to client {str(client)}: " + str(e))
             audit.log_action(
                 "send_to_client_fail",
                 client.username,
