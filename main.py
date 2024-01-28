@@ -1,3 +1,8 @@
+"""
+Backend server for Splash.
+Contains the main server functionality.
+"""
+
 # Import the server
 import datetime  # noqa: F401
 import json
@@ -34,6 +39,22 @@ from cloudlink.server.protocols import clpv4, scratch
 from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
 from oceanaudit import OceanAuditLogger
 from utils import WebSocketRateLimiter, isAuthenticated
+
+class WebSocketRateLimiter:
+    '''
+    Description of the WebSocketRateLimiter class.
+    '''
+    def acquire(self, client_id):
+        '''
+        Description of the acquire function.
+
+        Args:
+            self: The WebSocketRateLimiter object.
+            client_id: The client ID.
+
+        Returns:
+            None
+        '''
 
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
@@ -91,7 +112,17 @@ async def on_disconnect(client):
         authenticated_clients.remove(client.id)
 
 
-@server.on_command(cmd="direct", schema=clpv4.schema)
+async def direct(client, message):
+    '''
+    Description of the direct function.
+
+    Args:
+        client: The client object.
+        message: The message received.
+
+    Returns:
+        None
+    '''
 async def direct(client, message):
     if not await ratelimiter.acquire(client.id):
         Info("Ignoring rate limit")
