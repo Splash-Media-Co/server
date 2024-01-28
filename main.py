@@ -113,7 +113,7 @@ async def on_disconnect(client):
 
 
 async def direct(client, message):
-    '''
+    """
     Description of the direct function.
 
     Args:
@@ -122,7 +122,7 @@ async def direct(client, message):
 
     Returns:
         None
-    '''
+    """
 async def direct(client, message):
     if not await ratelimiter.acquire(client.id):
         Info("Ignoring rate limit")
