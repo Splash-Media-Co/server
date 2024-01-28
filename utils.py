@@ -12,6 +12,16 @@ class WebSocketRateLimiter:
         self.time_interval = time_interval
         self.client_buckets = {}
 
+        """
+    Description of the acquire function.
+
+    Args:
+        self: The WebSocketRateLimiter object.
+        client_id: The client ID.
+
+    Returns:
+        None
+    """
     async def acquire(self, client_id):
         if client_id not in self.client_buckets:
             self.client_buckets[client_id] = {
