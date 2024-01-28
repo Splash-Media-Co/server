@@ -30,10 +30,10 @@ from cloudlink import server
 # Import protocols
 from cloudlink.server.protocols import clpv4, scratch
 
-# Import logging helpers, OceanAudit, and rate-limiter
+# Import logging helpers, OceanAudit, and utils
 from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
 from oceanaudit import OceanAuditLogger
-from utils import WebSocketRateLimiter
+from utils import WebSocketRateLimiter, isAuthenticated
 
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
@@ -129,36 +129,8 @@ async def direct(client, message):
         case "post":
             match str(message["val"]["val"]["type"]):
                 case "send":
-                    if client.id not in authenticated_clients:
-                        try:
-                            server.send_packet_unicast(
-                                client,
-                                {
-                                    "cmd": "gmsg",
-                                    "val": {
-                                        "cmd": "status",
-                                        "val": {
-                                            "message": "Not authenticated",
-                                            "username": client.username,
-                                        },
-                                    },
-                                },
-                            )
-                            audit.log_action(
-                                "post_fail",
-                                client.username,
-                                f"User tried to post {str(message["val"]["val"]["p"])} while not authenticated",
-                            )
-                        except Exception as e:
-                            Error(
-                                f"Error sending message to client {str(client)}: "
-                                + str(e)
-                            )
-                            audit.log_action(
-                                "send_to_client_fail",
-                                client.username,
-                                f"Tried to post to client with error {e}",
-                            )
+                    if not await isAuthenticated(server, client, authenticated_clients):
+                        return
                     else:
                         uid = str(uuid.uuid4())
                         try:
@@ -215,36 +187,8 @@ async def direct(client, message):
                             with concurrent.futures.ProcessPoolExecutor() as executor:
                                 executor.submit(post, url + str(payload[0]))
                 case "delete":
-                    if client.id not in authenticated_clients:
-                        try:
-                            server.send_packet_unicast(
-                                client,
-                                {
-                                    "cmd": "gmsg",
-                                    "val": {
-                                        "cmd": "status",
-                                        "val": {
-                                            "message": "Not authenticated",
-                                            "username": client.username,
-                                        },
-                                    },
-                                },
-                            )
-                            audit.log_action(
-                                "delete_fail",
-                                client.username,
-                                f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} while not being authenticated",
-                            )
-                        except Exception as e:
-                            Error(
-                                f"Error sending message to client {str(client)}: "
-                                + str(e)
-                            )
-                            audit.log_action(
-                                "send_to_client_fail",
-                                client.username,
-                                f"Tried to post to client with error {e}",
-                            )
+                    if not await isAuthenticated(server, client, authenticated_clients):
+                        return
                     else:
                         selection = db.select_data(
                             "posts",
@@ -316,36 +260,8 @@ async def direct(client, message):
                                 f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
                             )
                 case "edit":
-                    if client.id not in authenticated_clients:
-                        try:
-                            server.send_packet_unicast(
-                                client,
-                                {
-                                    "cmd": "gmsg",
-                                    "val": {
-                                        "cmd": "status",
-                                        "val": {
-                                            "message": "Not authenticated",
-                                            "username": client.username,
-                                        },
-                                    },
-                                },
-                            )
-                            audit.log_action(
-                                "edit_fail",
-                                client.username,
-                                f"User tried to edit a post with UID {str(message["val"]["val"]["uid"])} while not being authenticated",
-                            )
-                        except Exception as e:
-                            Error(
-                                f"Error sending message to client {str(client)}: "
-                                + str(e)
-                            )
-                            audit.log_action(
-                                "send_to_client_fail",
-                                client.username,
-                                f"Tried to post to client with error {e}",
-                            )
+                    if not await isAuthenticated(server, client, authenticated_clients):
+                        return
                     else:
                         selection = db.select_data(
                             "posts",
