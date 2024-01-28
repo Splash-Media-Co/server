@@ -129,7 +129,7 @@ async def direct(client, message):
         case "post":
             match str(message["val"]["val"]["type"]):
                 case "send":
-                    if not isAuthenticated(server, client.id, authenticated_clients):
+                    if not await isAuthenticated(server, client, authenticated_clients):
                         return
                     else:
                         uid = str(uuid.uuid4())
@@ -187,7 +187,7 @@ async def direct(client, message):
                             with concurrent.futures.ProcessPoolExecutor() as executor:
                                 executor.submit(post, url + str(payload[0]))
                 case "delete":
-                    if not isAuthenticated(server, client.id, authenticated_clients):
+                    if not await isAuthenticated(server, client, authenticated_clients):
                         return
                     else:
                         selection = db.select_data(
@@ -260,7 +260,7 @@ async def direct(client, message):
                                 f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
                             )
                 case "edit":
-                    if not isAuthenticated(server, client.id, authenticated_clients):
+                    if not await isAuthenticated(server, client, authenticated_clients):
                         return
                     else:
                         selection = db.select_data(

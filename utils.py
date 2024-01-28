@@ -1,5 +1,9 @@
 import time
-import audit
+from oceanaudit import OceanAuditLogger
+from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
+
+# Instantiate the OceanAuditLogger object
+audit = OceanAuditLogger()
 
 class WebSocketRateLimiter:
     def __init__(self, rate_limit, time_interval):
@@ -30,7 +34,7 @@ class WebSocketRateLimiter:
         else:
             return False
 
-async def isAuthenticated(server, client_id, authenticated_clients):
+async def isAuthenticated(server, client, authenticated_clients):
     if client.id not in authenticated_clients:
         try:
             server.send_packet_unicast(
@@ -49,9 +53,8 @@ async def isAuthenticated(server, client_id, authenticated_clients):
             audit.log_action(
                 "not_authenticated",
                 client.username,
-                f"User tried to do something {str(message["val"]["val"]["p"])} while not authenticated",
+                "User tried to do something while not authenticated",
             )
-            return False
         except Exception as e:
             Error(
                 f"Error sending message to client {str(client)}: "
@@ -62,5 +65,7 @@ async def isAuthenticated(server, client_id, authenticated_clients):
                 client.username,
                 f"Tried to post to client with error {e}",
             )
+        finally:
+            return False
     else:
         return True

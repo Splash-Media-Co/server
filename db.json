@@ -3,7 +3,7 @@
      "username":"TEXT",
      "creation_date":"BIGINT",
      "uuid":"TEXT",
-     "banned?":"BOOL",
+     "banned":"BOOL",
      "quote":"TEXT",
      "pfpid":"INTEGER",
      "lastseen":"BIGINT",
@@ -15,9 +15,9 @@
      "creation_date":"BIGINT",
      "uid":"TEXT",
      "content":"TEXT",
-     "isDeleted?":"BOOL",
+     "isDeleted":"BOOL",
      "post_origin":"TEXT",
-     "type":"TEXT"
+     "type":"TEXT",
      "attachment":"TEXT"
   }
 }
