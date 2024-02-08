@@ -75,6 +75,7 @@ scratch = scratch(server)
 KEY = os.getenv("KEY")
 
 authenticated_clients = []
+authenticated_client_usernames = []
 
 SETTINGS = {"bridge_enabled": True}
 
@@ -140,7 +141,7 @@ async def direct(client, message):
                         db.insert_data(
                             "posts",
                             (
-                                str(client.username),
+                                str(authenticated_client_usernames[client.id]),
                                 float(time.time()),
                                 uid,
                                 str(message["val"]["val"]["p"]),
@@ -158,7 +159,7 @@ async def direct(client, message):
                                 "val": {
                                     "cmd": "rpost",
                                     "val": {
-                                        "author": client.username,
+                                        "author": authenticated_client_usernames[client.id],
                                         "post_content": str(message["val"]["val"]["p"]),
                                         "uid": uid,
                                         "attachment": attachment,
@@ -168,13 +169,13 @@ async def direct(client, message):
                         )
                         audit.log_action(
                             "post",
-                            client.username,
+                            authenticated_client_usernames[client.id],
                             f"User posted {str(message["val"]["val"]["p"])}",
                         )
                         if SETTINGS["bridge_enabled"]:
                             url = "https://splashpost.vercel.app/home/"
                             payload = (
-                                client.username
+                                authenticated_client_usernames[client.id]
                                 + ": "
                                 + str(message["val"]["val"]["p"]).strip()
                                 + (
@@ -196,9 +197,9 @@ async def direct(client, message):
                         )
                         print(selection)
                         print(selection[0][0])
-                        print(client.username)
+                        print(authenticated_client_usernames[client.id])
                         if selection:
-                            if str(selection[0][0]) == str(client.username):
+                            if str(selection[0][0]) == str(authenticated_client_usernames[client.id]):
                                 db.update_data(
                                     "posts",
                                     {"isDeleted": True},
@@ -218,7 +219,7 @@ async def direct(client, message):
                                 )
                                 audit.log_action(
                                     "delete",
-                                    client.username,
+                                    authenticated_client_usernames[client.id],
                                     f"User deleted post with UID {str(message["val"]["val"]["uid"])}",
                                 )
                             else:
@@ -230,14 +231,14 @@ async def direct(client, message):
                                             "cmd": "status",
                                             "val": {
                                                 "message": "Not authorized",
-                                                "username": client.username,
+                                                "username": authenticated_client_usernames[client.id],
                                             },
                                         },
                                     },
                                 )
                                 audit.log_action(
                                     "delete_fail",
-                                    client.username,
+                                    authenticated_client_usernames[client.id],
                                     f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that doesn't belong to their account",
                                 )
                         else:
@@ -249,14 +250,14 @@ async def direct(client, message):
                                         "cmd": "status",
                                         "val": {
                                             "message": "Post not found",
-                                            "username": client.username,
+                                            "username": authenticated_client_usernames[client.id],
                                         },
                                     },
                                 },
                             )
                             audit.log_action(
                                 "delete_fail",
-                                client.username,
+                                authenticated_client_usernames[client.id],
                                 f"User tried to delete a post with UID {str(message["val"]["val"]["uid"])} that didn't exist",
                             )
                 case "edit":
@@ -268,7 +269,7 @@ async def direct(client, message):
                             conditions={"uid": str(message["val"]["val"]["uid"])},
                         )
                         if selection:
-                            if str(selection[0][0]) != str(client.username):
+                            if str(selection[0][0]) != str(authenticated_client_usernames[client.id]):
                                 server.send_packet_unicast(
                                     client,
                                     {
@@ -277,14 +278,14 @@ async def direct(client, message):
                                             "cmd": "status",
                                             "val": {
                                                 "message": "Not authorized",
-                                                "username": client.username,
+                                                "username": authenticated_client_usernames[client.id],
                                             },
                                         },
                                     },
                                 )
                                 audit.log_action(
                                     "edit_fail",
-                                    client.username,
+                                    authenticated_client_usernames[client.id],
                                     f"User tried to edit a post with UID {str(message["val"]["val"]["uid"])} that doesn't belong to their account",
                                 )
                             else:
@@ -315,7 +316,7 @@ async def direct(client, message):
                                 )
                                 audit.log_action(
                                     "edit",
-                                    client.username,
+                                    authenticated_client_usernames[client.id],
                                     f"User edited a post with UID {str(message["val"]["val"]["uid"])}",
                                 )
                         else:
@@ -327,7 +328,7 @@ async def direct(client, message):
                                         "cmd": "status",
                                         "val": {
                                             "message": "Post not found",
-                                            "username": client.username,
+                                            "username": authenticated_client_usernames[client.id],
                                         },
                                     },
                                 },
@@ -371,6 +372,7 @@ async def direct(client, message):
                         "User authenticated!",
                     )
                     authenticated_clients.append(client.id)
+                    authenticated_client_usernames.append(client.username)
                 else:
                     server.send_packet_unicast(
                         client,
