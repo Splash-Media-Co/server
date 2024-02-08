@@ -45,13 +45,23 @@ server = server()
 ratelimiter = WebSocketRateLimiter(5, 1)
 
 
-# define timestamp sorting
+"""
+    Define a function to sort timestamps.
+    Args:
+        e: The timestamp to be sorted.
+    Returns:
+        The sorted timestamp.
+    """\ndef timestampsort(e)
 def timestampsort(e):
     return e[1]
 
 
 # define paralelized POST request
-def post(url):
+"""
+    Send a POST request to the specified URL.
+    Args:
+        url (str): The URL to send the POST request to.
+    """\ndef post(url):
     response = requests.post(url, timeout=5)
     Info(
         "Statuscode: " + str(response.status_code),
@@ -85,6 +95,11 @@ async def on_connect(client):
     Info(f"Client {str(client.id)} connected")
 
 
+"""Check if a client is authenticated.
+    Args:
+        server: The server instance.
+        client: The client to be authenticated.
+        authenticated_clients: The list of authenticated clients."""
 @server.on_disconnect
 async def on_disconnect(client):
     Info(f"Client {str(client.id)} disconnected")
