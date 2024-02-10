@@ -52,6 +52,15 @@ def timestampsort(e):
 
 # define paralelized POST request
 def post(url, token=None):
+    """Send a POST request to the specified URL with optional token-based authentication.
+
+    Args:
+        url (str): The URL to send the POST request to.
+        token (str, optional): The token for authentication. Defaults to None.
+
+    Returns:
+        None
+    """
     headers = {}
     if token:
         headers["Authorization"] = "Bearer " + token
@@ -585,7 +594,8 @@ async def msg(client, message):
 Info("Started server!")
 
 
-def signal_handler(sig, frame):
+def signal_handler(sig, frame):    
+    pass
     print("\n")
     Error(f"Received signal {sig}. Script is terminating.")
     db.close()
