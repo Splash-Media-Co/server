@@ -6,3 +6,5 @@ pyjwt
 cryptography
 requests
 bcrypt
+better_profanity
+python-dotenv

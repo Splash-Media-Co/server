@@ -1,7 +1,5 @@
 # Import the server
-import datetime  # noqa: F401
-import json
-import os
+from cloudlink import server
 
 # Import signal handling, sys, and os
 import signal
@@ -23,9 +21,12 @@ import jwt  # noqa: F401
 import concurrent.futures  # noqa: F401
 
 
-# Import requests and json libraries
+# Import requests and miscelaneous libraries
 import requests
-from cloudlink import server
+import datetime  # noqa: F401
+import json
+import os
+from dotenv import load_dotenv
 
 # Import protocols
 from cloudlink.server.protocols import clpv4, scratch
@@ -33,7 +34,7 @@ from cloudlink.server.protocols import clpv4, scratch
 # Import logging helpers, OceanAudit, and utils
 from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
 from oceanaudit import OceanAuditLogger
-from utils import WebSocketRateLimiter, isAuthenticated
+from utils import WebSocketRateLimiter, isAuthenticated, Moderator
 
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
@@ -44,24 +45,27 @@ server = server()
 # Instantiate ratelimiter
 ratelimiter = WebSocketRateLimiter(5, 1)
 
+# Settings
+SETTINGS = {"bridge_enabled": True, "mlModeration": False}
 
 # define timestamp sorting
 def timestampsort(e):
     return e[1]
 
-
+# Define 
 # define paralelized POST request
 def post(url, token=None):
     headers = {}
     if token:
-        headers["Authorization"] = "Bearer " + token
+        headers = {"Authorization": "Bearer " + token}
 
     requests.post(url, headers=headers, timeout=5)
 
 
-# Instantiate the OceanDB object and OceanAuditLogger object
+# Instantiate objects
 db = OceanDB("db")
 audit = OceanAuditLogger()
+moderator = Moderator(SETTINGS["mlModeration"])
 
 # Set logging level
 server.logging.basicConfig(
@@ -73,14 +77,13 @@ clpv4 = clpv4(server)
 scratch = scratch(server)
 
 # Load secrets
+load_dotenv()
+
 KEY = os.getenv("KEY")
 TOKEN = os.getenv("TOKEN")
 
 authenticated_clients = []
 authenticated_client_usernames = []
-
-SETTINGS = {"bridge_enabled": True}
-
 
 @server.on_connect
 async def on_connect(client):
@@ -140,6 +143,29 @@ async def direct(client, message):
                             attachment = str(message["val"]["val"]["attachment"])
                         except KeyError:
                             attachment = ""
+
+                        if SETTINGS["mlModeration"]:
+                            if not await moderator.moderate(str(message["val"]["val"]["p"])):
+                                server.send_packet_unicast(client, {
+                                    "cmd": "pmsg",
+                                    "val": {
+                                        "cmd": "moderror",
+                                        "val": {
+                                            "message": "Your post got flagged.",
+                                            "post": str(message["val"]["val"]["p"])
+                                        },
+                                    },
+                                })
+                                audit.log_action(
+                                    "post_fail",
+                                    authenticated_client_usernames[
+                                        authenticated_clients.index(client.id)
+                                    ],
+                                    f"User tried to post {str(message["val"]["val"]["p"])} but moderation caught it",
+                                )
+                                return
+                        else:
+                            message["val"]["val"]["p"] = await moderator.moderate(message["val"]["val"]["p"])
                         db.insert_data(
                             "posts",
                             (
@@ -206,13 +232,6 @@ async def direct(client, message):
                         selection = db.select_data(
                             "posts",
                             conditions={"uid": str(message["val"]["val"]["uid"])},
-                        )
-                        print(selection)
-                        print(selection[0][0])
-                        print(
-                            authenticated_client_usernames[
-                                authenticated_clients.index(client.id)
-                            ]
                         )
                         if selection:
                             if str(selection[0][0]) == str(
@@ -331,6 +350,28 @@ async def direct(client, message):
                                     f"User tried to edit a post with UID {str(message["val"]["val"]["uid"])} that doesn't belong to their account",
                                 )
                             else:
+                                if SETTINGS["mlModeration"]:
+                                    if not await moderator.moderate(str(message["val"]["val"]["edit"])):
+                                        server.send_packet_unicast(client, {
+                                            "cmd": "pmsg",
+                                            "val": {
+                                                "cmd": "moderror",
+                                                "val": {
+                                                    "message": "Your edit got flagged.",
+                                                    "post": str(message["val"]["val"]["edit"])
+                                                },
+                                            },
+                                        })
+                                        audit.log_action(
+                                            "edit_fail",
+                                            authenticated_client_usernames[
+                                                authenticated_clients.index(client.id)
+                                            ],
+                                            f"User tried to edit {str(message["val"]["val"]["edit"])} but moderation caught it",
+                                        )
+                                        return
+                                else:
+                                    message["val"]["val"]["edit"] = await moderator.moderate(message["val"]["val"]["edit"])
                                 db.update_data(
                                     "posts",
                                     {
