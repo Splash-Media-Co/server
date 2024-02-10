@@ -594,7 +594,7 @@ async def msg(client, message):
 Info("Started server!")
 
 
-def signal_handler(sig, frame):    
+def signal_handler(sig, frame):
     pass
     print("\n")
     Error(f"Received signal {sig}. Script is terminating.")
