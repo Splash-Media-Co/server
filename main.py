@@ -51,11 +51,12 @@ def timestampsort(e):
 
 
 # define paralelized POST request
-def post(url):
-    response = requests.post(url, timeout=5)
-    Info(
-        "Statuscode: " + str(response.status_code),
-    )
+def post(url, token=None):
+    headers = {}
+    if token:
+        headers['Authorization'] = 'Bearer ' + token
+
+    response = requests.post(url, headers=headers, timeout=5)
 
 
 # Instantiate the OceanDB object and OceanAuditLogger object
@@ -71,8 +72,9 @@ server.logging.basicConfig(
 clpv4 = clpv4(server)
 scratch = scratch(server)
 
-# Load secret
+# Load secrets
 KEY = os.getenv("KEY")
+TOKEN = os.getenv("TOKEN")
 
 authenticated_clients = []
 authenticated_client_usernames = []
@@ -196,7 +198,7 @@ async def direct(client, message):
                             )
 
                             with concurrent.futures.ProcessPoolExecutor() as executor:
-                                executor.submit(post, url + str(payload[0]))
+                                executor.submit(post, url + str(payload[0]), TOKEN)
                 case "delete":
                     if not await isAuthenticated(server, client, authenticated_clients):
                         return
