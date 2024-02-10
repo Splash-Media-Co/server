@@ -48,11 +48,13 @@ ratelimiter = WebSocketRateLimiter(5, 1)
 # Settings
 SETTINGS = {"bridge_enabled": True, "mlModeration": False}
 
+
 # define timestamp sorting
 def timestampsort(e):
     return e[1]
 
-# Define 
+
+# Define
 # define paralelized POST request
 def post(url, token=None):
     headers = {}
@@ -84,6 +86,7 @@ TOKEN = os.getenv("TOKEN")
 
 authenticated_clients = []
 authenticated_client_usernames = []
+
 
 @server.on_connect
 async def on_connect(client):
@@ -145,17 +148,22 @@ async def direct(client, message):
                             attachment = ""
 
                         if SETTINGS["mlModeration"]:
-                            if not await moderator.moderate(str(message["val"]["val"]["p"])):
-                                server.send_packet_unicast(client, {
-                                    "cmd": "pmsg",
-                                    "val": {
-                                        "cmd": "moderror",
+                            if not await moderator.moderate(
+                                str(message["val"]["val"]["p"])
+                            ):
+                                server.send_packet_unicast(
+                                    client,
+                                    {
+                                        "cmd": "pmsg",
                                         "val": {
-                                            "message": "Your post got flagged.",
-                                            "post": str(message["val"]["val"]["p"])
+                                            "cmd": "moderror",
+                                            "val": {
+                                                "message": "Your post got flagged.",
+                                                "post": str(message["val"]["val"]["p"]),
+                                            },
                                         },
                                     },
-                                })
+                                )
                                 audit.log_action(
                                     "post_fail",
                                     authenticated_client_usernames[
@@ -165,7 +173,9 @@ async def direct(client, message):
                                 )
                                 return
                         else:
-                            message["val"]["val"]["p"] = await moderator.moderate(message["val"]["val"]["p"])
+                            message["val"]["val"]["p"] = await moderator.moderate(
+                                message["val"]["val"]["p"]
+                            )
                         db.insert_data(
                             "posts",
                             (
@@ -351,17 +361,26 @@ async def direct(client, message):
                                 )
                             else:
                                 if SETTINGS["mlModeration"]:
-                                    if not await moderator.moderate(str(message["val"]["val"]["edit"])):
-                                        server.send_packet_unicast(client, {
-                                            "cmd": "pmsg",
-                                            "val": {
-                                                "cmd": "moderror",
+                                    if not await moderator.moderate(
+                                        str(message["val"]["val"]["edit"])
+                                    ):
+                                        server.send_packet_unicast(
+                                            client,
+                                            {
+                                                "cmd": "pmsg",
                                                 "val": {
-                                                    "message": "Your edit got flagged.",
-                                                    "post": str(message["val"]["val"]["edit"])
+                                                    "cmd": "moderror",
+                                                    "val": {
+                                                        "message": "Your edit got flagged.",
+                                                        "post": str(
+                                                            message["val"]["val"][
+                                                                "edit"
+                                                            ]
+                                                        ),
+                                                    },
                                                 },
                                             },
-                                        })
+                                        )
                                         audit.log_action(
                                             "edit_fail",
                                             authenticated_client_usernames[
@@ -371,7 +390,11 @@ async def direct(client, message):
                                         )
                                         return
                                 else:
-                                    message["val"]["val"]["edit"] = await moderator.moderate(message["val"]["val"]["edit"])
+                                    message["val"]["val"][
+                                        "edit"
+                                    ] = await moderator.moderate(
+                                        message["val"]["val"]["edit"]
+                                    )
                                 db.update_data(
                                     "posts",
                                     {

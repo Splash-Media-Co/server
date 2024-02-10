@@ -76,6 +76,7 @@ async def isAuthenticated(server, client, authenticated_clients):
     else:
         return True
 
+
 class Moderator:
     def __init__(self, ml_enabled: bool = True):
         self.ml_enabled = ml_enabled
@@ -91,11 +92,11 @@ class Moderator:
 
             response = requests.post(API_URL, headers=headers, json=payload)
             data = response.json()
-            
+
             if data and isinstance(data, list) and len(data) > 0:
                 result = data[0]
                 if isinstance(result, list) and len(result) > 0:
-                    toxicity_score = result[0].get('score', 0)
+                    toxicity_score = result[0].get("score", 0)
                     return toxicity_score <= 0.6
         else:
             profanity.load_censor_words()
