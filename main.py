@@ -54,7 +54,7 @@ def timestampsort(e):
 def post(url, token=None):
     headers = {}
     if token:
-        headers['Authorization'] = 'Bearer ' + token
+        headers["Authorization"] = "Bearer " + token
 
     requests.post(url, headers=headers, timeout=5)
 
