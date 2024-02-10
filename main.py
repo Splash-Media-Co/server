@@ -52,6 +52,15 @@ def timestampsort(e):
 
 # define paralelized POST request
 def post(url, token=None):
+    """Sends a POST request to the specified URL.
+
+    Args:
+        url (str): The URL to send the request to.
+        token (str, optional): The authorization token.
+
+    Returns:
+        None
+    """
     headers = {}
     if token:
         headers['Authorization'] = 'Bearer ' + token
