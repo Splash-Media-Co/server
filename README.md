@@ -11,140 +11,154 @@
 
 ## Overview
 
-The Splash server is responsible for handling various commands from clients, such as posting messages, authentication, retrieving posts, and account creation. This document provides documentation for the supported commands and their payloads.
+The Splash server is a backend system responsible for handling various commands from clients, such as posting messages, authentication, retrieving posts, and account creation. This document provides comprehensive documentation for each supported command, including usage instructions, parameters, examples, and potential errors.
 
 ## Commands
 
 ### 1. `direct`
 
-#### Payload
-```json
-{"cmd": "direct", "val": {"cmd": "post", "val": {"type": "send", "p": "Your post content", "attachment": "Optional attachment"}}}
-```
+#### Description
+The `direct` command enables clients to perform direct actions such as posting messages, deleting posts, or editing posts.
 
-- **Description**: Direct command for posting messages.
-- **Parameters**:
-  - `"type"`: Specifies the type of post, currently supporting `"send"` for sending messages.
-  - `"p"`: The content of the post.
-  - `"attachment"`: Optional attachment for the post (e.g., an image).
+#### Parameters
+- `type`: Specifies the type of action to perform (`post`, `delete`, or `edit`).
+- `uid`: Unique identifier of the post to perform the action on.
+- `edit`: New content for the post if the action is editing.
+- `attachment`: Optional attachment file name for posting.
 
-#### Payload
-```json
-{"cmd": "direct", "val": {"cmd": "post", "val": {"type": "delete", "uid": "PostUID"}}}
-```
+#### Usage
+- To post a message:
+  ```json
+  {
+    "cmd": "direct",
+    "val": {
+      "cmd": "post",
+      "val": {
+        "type": "send",
+        "p": "Hello, world!",
+        "attachment": "image.png"
+      }
+    }
+  }
+  ```
 
-- **Description**: Direct command for deleting a post.
-- **Parameters**:
-  - `"type"`: Specifies the type of post operation, currently supporting `"delete"`.
-  - `"uid"`: Unique identifier for the post to be deleted.
+- To delete a post:
+  ```json
+  {
+    "cmd": "direct",
+    "val": {
+      "cmd": "post",
+      "val": {
+        "type": "delete",
+        "uid": "123456789"
+      }
+    }
+  }
+  ```
 
-#### Payload
-```json
-{"cmd": "direct", "val": {"cmd": "post", "val": {"type": "edit", "uid": "PostUID", "edit": "Edited post content"}}}
-```
+- To edit a post:
+  ```json
+  {
+    "cmd": "direct",
+    "val": {
+      "cmd": "post",
+      "val": {
+        "type": "edit",
+        "uid": "123456789",
+        "edit": "Updated message"
+      }
+    }
+  }
+  ```
 
-- **Description**: Direct command for editing a post.
-- **Parameters**:
-  - `"type"`: Specifies the type of post operation, currently supporting `"edit"`.
-  - `"uid"`: Unique identifier for the post to be edited.
-  - `"edit"`: The new content of the post.
+#### Possible Errors
+- Rate Limit Exceeded
+- Invalid JSON Payload
+- Authentication Failure
+- Moderation Flag
+- Post Not Found
+- Not Authorized
+- Unexpected Error
 
 ### 2. `auth`
 
-#### Payload
+#### Description
+The `auth` command is used to authenticate a user.
+
+#### Parameters
+- `pswd`: The password associated with the user's account.
+
+#### Usage
 ```json
-{"cmd": "auth", "val": {"pswd": "YourPassword"}}
+{
+  "cmd": "auth",
+  "val": {
+    "pswd": "password123"
+  }
+}
 ```
 
-- **Description**: Authenticate a user.
-- **Parameters**:
-  - (Username set using CloudLink usernames)
-  - `"pswd"`: User's password.
+#### Possible Errors
+- Invalid Password
+- User Doesn't Exist
 
 ### 3. `retrieve`
 
-#### Payload
+#### Description
+The `retrieve` command is used to retrieve posts.
+
+#### Parameters
+- `type`: Specifies the type of retrieval (`latest` currently supported).
+- `c`: Chat ID or identifier for the conversation.
+- `o`: Offset value for retrieving posts.
+
+#### Usage
 ```json
-{"cmd": "retrieve", "val": {"type": "latest", "c": "ChatID", "o": "Offset"}}
+{
+  "cmd": "retrieve",
+  "val": {
+    "type": "latest",
+    "c": "chat_id",
+    "o": 0
+  }
+}
 ```
 
-- **Description**: Retrieve posts.
-- **Parameters**:
-  - `"type"`: Specifies the retrieval type, currently supporting `"latest"`.
-  - `"c"`: Chat ID for posts retrieval.
-  - `"o"`: Offset for retrieving posts.
+#### Possible Errors
+- Authentication Failure
 
 ### 4. `genaccount`
 
-#### Payload
+#### Description
+The `genaccount` command is used to generate a new user account.
+
+#### Parameters
+- `pswd`: The password for the new account.
+
+#### Usage
 ```json
-{"cmd": "genaccount", "val": {"pswd": "NewPassword"}}
+{
+  "cmd": "genaccount",
+  "val": {
+    "pswd": "password123"
+  }
+}
 ```
 
-- **Description**: Generate a new user account.
-- **Parameters**:
-  - (Username set using CloudLink usernames)
-  - `"pswd"`: New user's password.
-
-## Error Handling
-
-The server handles various errors and sends corresponding status messages back to the clients.
-
-- **Not Authenticated**:
-  - Status message: `"Not authenticated"`
-  - Action logged: `"post_fail"`, `"delete_fail"`, `"edit_fail"`, or `"retrieve_fail"`.
-
-- **Invalid Password**:
-  - Status message: `"Invalid password"`
-  - Action logged: `"auth_fail"`.
-
-- **User Doesn't Exist**:
-  - Status message: `"User doesn't exist"`
-  - Action logged: `"auth_fail"`.
-
-- **User Already Exists**:
-  - Status message: `"User already exists"`
-  - Action logged: `"create_account_fail"`.
-
-- **Post Not Found**:
-  - Status message: `"Post not found"`
-  - Action logged: `"delete_fail"`.
-
-- **Not Authorized**:
-  - Status message: `"Not authorized"`
-  - Action logged: `"delete_fail"` or `"edit_fail"`.
-
-- **Unexpected Error**:
-  - Status message: `"An unexpected error occurred."`
-  - Action logged: `"create_account_fail"`.
+#### Possible Errors
+- User Already Exists
+- Unexpected Error
 
 ## Usage
 
 1. **Connect to the Server**:
-   - Use the `on_connect` event to handle client connections.
-   - Use the `on_disconnect` event to handle client disconnections.
+   - Utilize WebSocket connections to connect clients to the server.
 
 2. **Send Commands**:
-   - Use the `direct` command to post messages.
-   - Use the `auth` command to authenticate users.
-   - Use the `retrieve` command to retrieve posts.
-   - Use the `genaccount` command to generate new user accounts.
+   - Send JSON-formatted commands to the server using WebSocket communication.
 
 3. **Handle Responses**:
-   - Utilize the `on_message` event to handle server responses.
-   - Check the status messages for success or failure.
+   - Handle server responses and status messages received via WebSocket.
 
 4. **Error Handling**:
-   - Pay attention to status messages for error handling.
-   - Refer to the specific error conditions mentioned in the documentation.
-
-5. **Logging**:
-   - The server logs various actions and errors using the OceanAuditLogger.
-   - Monitor logs for debugging and tracking user actions.
-
-6. **Graceful Termination**:
-   - The server can be terminated gracefully using `CTRL+C`.
-   - Logs are closed, and the system exits gracefully.
-
-7. **Start the Server**:
-   - Ensure that the server is started using the `server.run()` command.
+   - Check for status messages in responses to handle errors gracefully.
