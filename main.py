@@ -65,7 +65,7 @@ def post(url, token=None):
     if token:
         headers['Authorization'] = 'Bearer ' + token
 
-    response = requests.post(url, headers=headers, timeout=5)
+    requests.post(url, headers=headers, timeout=5)
 
 
 # Instantiate the OceanDB object and OceanAuditLogger object
