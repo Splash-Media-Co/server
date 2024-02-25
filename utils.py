@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 import os
 
 load_dotenv()
-HF_TOKEN: str = os.getenv("HF_TOKEN")
+HF_TOKEN: str = os.getenv("HF_TOKEN") # type: ignore
 
 # Instantiate the OceanAuditLogger object
 audit = OceanAuditLogger()
