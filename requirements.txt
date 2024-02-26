@@ -8,3 +8,4 @@ requests
 bcrypt
 better_profanity
 python-dotenv
+flask
