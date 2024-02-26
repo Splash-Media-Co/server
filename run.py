@@ -8,6 +8,7 @@ server_process = None
 print("Starting the server...")
 server_process = subprocess.Popen(["python", "main.py"])
 
+
 @app.post("/gh-push")
 def github_push():
     global server_process
@@ -22,6 +23,7 @@ def github_push():
         print("Starting the server...")
         server_process = subprocess.Popen(["python", "main.py"])
         return "Done!", 200
+
 
 if __name__ == "__main__":
     app.run(port=4000)
