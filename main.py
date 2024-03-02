@@ -68,7 +68,7 @@ audit = OceanAuditLogger()
 moderator = Moderator(SETTINGS["mlModeration"])
 
 # Set logging level
-server.logging.basicConfig(level=server.logging.DEBUG)
+server.logging.basicConfig(level=server.logging.INFO)
 
 # Load protocols
 clpv4 = clpv4(server)
