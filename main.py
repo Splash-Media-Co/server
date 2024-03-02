@@ -39,9 +39,11 @@ from utils import WebSocketRateLimiter, isAuthenticated, Moderator
 # Import DB handler
 from oceandb import OceanDB  # noqa: F401
 
+
 # Define timestamp sorting function
 def timestampsort(e):
     return e[1]
+
 
 # Define function for parallelized POST request
 def post(url, token=None):
@@ -49,6 +51,7 @@ def post(url, token=None):
     if token:
         headers = {"Authorization": "Bearer " + token}
     requests.post(url, headers=headers, timeout=5)
+
 
 # Instantiate server object
 server = server()
@@ -79,10 +82,12 @@ TOKEN = os.getenv("TOKEN")
 authenticated_clients = []
 authenticated_client_usernames = []
 
+
 # Event handler for client connection
 @server.on_connect
 async def on_connect(client):
     Info(f"Client {str(client.id)} connected")
+
 
 # Event handler for client disconnection
 @server.on_disconnect
@@ -90,6 +95,7 @@ async def on_disconnect(client):
     Info(f"Client {str(client.id)} disconnected")
     if client.id in authenticated_clients:
         authenticated_clients.remove(client.id)
+
 
 # Event handler for direct command
 @server.on_command(cmd="direct", schema=clpv4.schema)
@@ -278,9 +284,7 @@ async def direct(client, message):
                                         "val": {
                                             "message": "Not authorized",
                                             "username": authenticated_client_usernames[
-                                                authenticated_clients.index(
-                                                    client.id
-                                                )
+                                                authenticated_clients.index(client.id)
                                             ],
                                         },
                                     },
@@ -338,9 +342,7 @@ async def direct(client, message):
                                         "val": {
                                             "message": "Not authorized",
                                             "username": authenticated_client_usernames[
-                                                authenticated_clients.index(
-                                                    client.id
-                                                )
+                                                authenticated_clients.index(client.id)
                                             ],
                                         },
                                     },
@@ -367,9 +369,7 @@ async def direct(client, message):
                                                 "val": {
                                                     "message": "Your edit got flagged.",
                                                     "post": str(
-                                                        message["val"]["val"][
-                                                            "edit"
-                                                        ]
+                                                        message["val"]["val"]["edit"]
                                                     ),
                                                 },
                                             },
@@ -404,12 +404,8 @@ async def direct(client, message):
                                     "val": {
                                         "cmd": "redit",
                                         "val": {
-                                            "uid": str(
-                                                message["val"]["val"]["uid"]
-                                            ),
-                                            "edit": str(
-                                                message["val"]["val"]["edit"]
-                                            ),
+                                            "uid": str(message["val"]["val"]["uid"]),
+                                            "edit": str(message["val"]["val"]["edit"]),
                                         },
                                     },
                                 },
@@ -634,8 +630,10 @@ async def direct(client, message):
                     f"Failed to create account with username {str(USER)} because it already exists",
                 )
 
+
 # Start the server
 Info("Started server!")
+
 
 # Signal handler
 def signal_handler(sig, frame):
@@ -643,6 +641,7 @@ def signal_handler(sig, frame):
     Error(f"Received signal {sig}. Script is terminating.")
     db.close()
     sys.exit(0)
+
 
 signal.signal(signal.SIGINT, signal_handler)
 
