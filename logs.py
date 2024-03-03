@@ -87,6 +87,7 @@ def Critical(text):
         + Style.RESET_ALL
     )
 
+
 def Awesome(text):
     print(
         Style.RESET_ALL
