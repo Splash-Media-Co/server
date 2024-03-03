@@ -94,6 +94,7 @@ async def on_connect(client):
 async def on_disconnect(client):
     Info(f"Client {str(client.id)} disconnected")
     if client.id in authenticated_clients:
+        authenticated_client_usernames.remove(client.username)
         authenticated_clients.remove(client.id)
 
 
