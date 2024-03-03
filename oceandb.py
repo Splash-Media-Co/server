@@ -1,4 +1,4 @@
-from logs import Info, Warning, Debug, Error, Critical  # noqa: F401
+from logs import Info, Warning, Debug, Error, Critical, Awesome  # noqa: F401
 import sqlite3  # noqa: F401
 import json
 
@@ -33,10 +33,9 @@ class OceanDB:
             db_name (str): The name of the database.
         """
         self.db_name = db_name
-        print(f"{db_name}.sqlite")
         self.conn = sqlite3.connect(f"{db_name}.sqlite")
         self.cursor = self.conn.cursor()
-        Info(f"Connected to {db_name}.sqlite!")
+        Awesome(f"Connected to {db_name}.sqlite!")
         with open("db.json", "r") as f:
             data = json.load(f)
 
@@ -154,7 +153,6 @@ class OceanDB:
 
         self.cursor.execute(query, tuple(conditions.values()) if conditions else ())
         self.commit()
-        Warning(f"Deleted data from {table_name}")
 
     def close(self) -> None:
         """

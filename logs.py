@@ -86,3 +86,19 @@ def Critical(text):
         + text
         + Style.RESET_ALL
     )
+
+def Awesome(text):
+    print(
+        Style.RESET_ALL
+        + Fore.LIGHTWHITE_EX
+        + "["
+        + Fore.GREEN
+        + "AWESOME"
+        + Fore.LIGHTWHITE_EX
+        + "]"
+        + Fore.WHITE
+        + ": "
+        + Fore.GREEN
+        + text
+        + Style.RESET_ALL
+    )

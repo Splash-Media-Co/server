@@ -32,7 +32,7 @@ from dotenv import load_dotenv
 from cloudlink.server.protocols import clpv4, scratch
 
 # Import logging helpers, OceanAudit, and utils
-from logs import Critical, Debug, Error, Info, Warning  # noqa: F401
+from logs import Critical, Debug, Error, Info, Warning, Awesome  # noqa: F401
 from oceanaudit import OceanAuditLogger
 from utils import WebSocketRateLimiter, isAuthenticated, Moderator
 
@@ -633,7 +633,7 @@ async def direct(client, message):
 
 
 # Start the server
-Info("Started server!")
+Awesome("Started server!")
 
 
 # Signal handler
