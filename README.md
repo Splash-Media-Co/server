@@ -8,7 +8,7 @@
 ---
 
 # Splash Server Documentation
-
+[comment]: <> (This is a comment)
 ## Overview
 
 The Splash server is a backend system responsible for handling various commands from clients, such as posting messages, authentication, retrieving posts, and account creation. This document provides comprehensive documentation for each supported command, including usage instructions, parameters, examples, and potential errors. 
