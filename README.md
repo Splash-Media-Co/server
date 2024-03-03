@@ -12,6 +12,9 @@
 
 The Splash server is a backend system responsible for handling various commands from clients, such as posting messages, authentication, retrieving posts, and account creation. This document provides comprehensive documentation for each supported command, including usage instructions, parameters, examples, and potential errors. 
 
+> [!WARNING]  
+> This server is still in development. Expect breaking changes, bugs, and lots of unstable stuff.
+
 ## Commands
 
 ### 1. `direct`
