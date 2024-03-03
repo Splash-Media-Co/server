@@ -8,9 +8,11 @@ server_process = None
 print("Starting the server...")
 server_process = subprocess.Popen(["python", "main.py"])
 
+
 @app.route("/")
 def index():
     return "Pong!", 200
+
 
 @app.post("/gh-push")
 def github_push():
